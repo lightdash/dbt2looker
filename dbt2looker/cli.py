@@ -18,7 +18,7 @@ def run():
 
     # Get dbt models from manifest
     models = parser.parse_models(raw_manifest)
-    print(moedls)
+    print(models)
 
     # Generate lookml files
     lookml_views = [

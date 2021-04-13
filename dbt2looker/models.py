@@ -1,23 +1,24 @@
-from typing import Union, List
-from pydantic import BaseModel
+from typing import Union, Dict, List, Literal
+from pydantic import BaseModel, Field
 
 class LookViewFile(BaseModel):
-    filename: string
-    contents: string
+    filename: str
+    contents: str
 
-class DBTManifest(BaseModel):
-    nodes: Union[DBTModel, DBTNode]
+class DbtModelColumn(BaseModel):
+    name: str
+    description: str
 
-class DBTNode(BaseModel):
-    resource_type: string
+class DbtNode(BaseModel):
+    resource_type: Literal['analysis', 'seed', 'snapshot', 'test']
 
-class DBTModel(DBTNode):
-    resource_type: 'model'
-    schema: string
-    name: string
-    description: string
-    columns: List[DBTColumn]
+class DbtModel(BaseModel):
+    resource_type: Literal['model']
+    db_schema: str = Field(alias='schema')
+    name: str
+    description: str
+    columns: List[DbtModelColumn]
 
-class DBTModelColumn(BaseModel):
-    name: string
-    description: string
+
+class DbtManifest(BaseModel):
+    nodes: Dict[str, Union[DbtModel, DbtNode]]
