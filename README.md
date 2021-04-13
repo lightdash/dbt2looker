@@ -1,23 +1,36 @@
 # dbt2looker
 
+**Requires python >=3.7**
+
 Generate lookml for views from dbt models
 
 ## Install
 
-**PyPi repository**
-Install from pypi into a fresh virtual environment. Requires python >=3.7
+**Install from PyPi repository**
+
+Install from pypi into a fresh virtual environment.
+
 ```
+# Create virtual env
 python3.7 -m venv dbt2looker-venv
 source dbt2looker-venv/bin/activate
+
+# Install
 pip install dbt2looker
+
+# Run
 dbt2looker
 ```
 
-**From source**
-Install from source. Requires poetry and python >=3.7
+**Build from source**
+
+Requires [poetry](https://python-poetry.org/docs/) and python >=3.7
 
 ```
+# Install
 poetry install
+
+# Run
 poetry run dbt2looker
 ```
 
