@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "dbt2looker"
+version = "0.1.0"
+description = "Generate lookml view files from dbt models"
+authors = ["oliverlaslett <oliver@gethubble.io>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+lkml = "^1.1.0"
+pydantic = "^1.8.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+dbt2looker = 'dbt2looker.cli:run'
