@@ -29,5 +29,5 @@ def run():
     # Write output
     pathlib.Path(LOOKML_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
-        with open(os.open.join(LOOKML_OUTPUT_DIR, view.filename), 'w') as f:
+        with open(os.path.join(LOOKML_OUTPUT_DIR, view.filename), 'w') as f:
             f.write(view.contents)
