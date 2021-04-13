@@ -1,4 +1,20 @@
 from . import models
+from google.cloud import bigquery
+from google.cloud import storage
+
+client =  bigquery.Client.from_service_account_json('service_account.json')
+
+def extract_schema(client, model: models.DBTModel):
+    project = project.name
+    dataset_id = model.schema
+    table_id = model.name
+
+    dataset_ref = client.dataset(dataset_id, project=project)
+    table_ref = dataset_ref.table(table_id)
+    table = client.get_table(table_ref)  # API Request
+
+    return ["{0} {1}".format(schema.name,schema.field_type) for schema in table.schema] # returns: ['word STRING', 'word_count INTEGER']
+
 
 def lookml_view_from_dbt_model(model: models.DBTModel):
     contents = ''
