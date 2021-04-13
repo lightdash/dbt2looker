@@ -1,2 +1,3 @@
-# dbt-looker-views
+# dbt2looker
+
 Generate lookml for views from dbt models
