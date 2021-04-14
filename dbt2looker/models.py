@@ -1,4 +1,4 @@
-from typing import Union, Dict, List, Literal
+from typing import Union, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -13,6 +13,7 @@ class DbtModelColumn(BaseModel):
 
 
 class DbtNode(BaseModel):
+    unique_id: str
     resource_type: str
 
 
@@ -28,3 +29,28 @@ class DbtModel(DbtNode):
 
 class DbtManifest(BaseModel):
     nodes: Dict[str, Union[DbtModel, DbtNode]]
+
+
+class DbtCatalogNodeMetadata(BaseModel):
+    type: str
+    database: str
+    db_schema: str = Field(..., alias='schema')
+    name: str
+    comment: Optional[str]
+    owner: Optional[str]
+
+
+class DbtCatalogNodeColumn(BaseModel):
+    type: str
+    comment: Optional[str]
+    index: int
+    name: str
+
+
+class DbtCatalogNode(BaseModel):
+    metadata: DbtCatalogNodeMetadata
+    columns: Dict[str, DbtCatalogNodeColumn]
+
+
+class DbtCatalog(BaseModel):
+    nodes: Dict[str, DbtCatalogNode]

@@ -18,16 +18,29 @@ def get_manifest(prefix: str):
         raise SystemExit(f"No manifest.json file found in path {prefix}")
     with open(path, 'r') as f:
         raw_manifest = json.load(f)
-    parser.validate(raw_manifest)
+    parser.validate_manifest(raw_manifest)    # FIX
     print(f'Detected valid manifest at {path}')
     return raw_manifest
+
+
+def get_catalog(prefix: str):
+    paths = pathlib.Path('./').rglob('catalog.json')
+    try:
+        path = next(paths)
+    except StopIteration:
+        raise SystemExit(f"No catalog.json file found in path {prefix}")
+    with open(path, 'r') as f:
+        raw_catalog = json.load(f)
+    parser.validate_catalog(raw_catalog)    # FIX
+    print(f'Detected valid catalog at {path}')
+    return raw_catalog
 
 
 def run():
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
-        '--manifest',
-        help='Path to manifest.json file. Examples: ./target, manifest.json',
+        '--target',
+        help='Path to dbt target directory containing manifest.json and catalog.json.',
         default='./'
     )
     argparser.add_argument(
@@ -37,14 +50,16 @@ def run():
     args = argparser.parse_args()
 
     # Load raw manifest file
-    raw_manifest = get_manifest(args.manifest)
+    raw_manifest = get_manifest(args.target)
+    raw_catalog = get_catalog(args.target)
 
     # Get dbt models from manifest
     models = parser.parse_models(raw_manifest, tag=args.tag)
+    catalog_nodes = parser.parse_catalog_nodes(raw_catalog)
 
     # Generate lookml files
     lookml_views = [
-        generator.lookml_view_from_dbt_model(model)
+        generator.lookml_view_from_dbt_model(model, catalog_nodes)
         for model in models
     ]
 
