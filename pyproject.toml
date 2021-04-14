@@ -4,6 +4,9 @@ version = "0.3.0"
 description = "Generate lookml view files from dbt models"
 authors = ["oliverlaslett <oliver@gethubble.io>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/hubble-data/dbt2looker"
+repository = "https://github.com/hubble-data/dbt2looker"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
