@@ -63,8 +63,13 @@ def run():
         for model in models
     ]
 
+    lookml_model = generator.lookml_model_from_dbt_project(models)
+
     # Write output
     pathlib.Path(LOOKML_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
         with open(os.path.join(LOOKML_OUTPUT_DIR, view.filename), 'w') as f:
             f.write(view.contents)
+
+    with open(os.path.join(LOOKML_OUTPUT_DIR, lookml_model.filename), 'w') as f:
+        f.write(lookml_model.contents)

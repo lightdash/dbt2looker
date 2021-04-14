@@ -6,6 +6,9 @@ class LookViewFile(BaseModel):
     filename: str
     contents: str
 
+class LookModelFile(BaseModel):
+    filename: str
+    contents: str
 
 class DbtModelColumn(BaseModel):
     name: str
