@@ -9,6 +9,7 @@ license = "MIT"
 python = ">=3.7"
 lkml = "^1.1.0"
 pydantic = "^1.8.1"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -9,6 +9,11 @@ def validate_catalog(raw_catalog: dict):
     return True
 
 
+def parse_adapter_type(raw_manifest: dict):
+    manifest = models.DbtManifest(**raw_manifest)
+    return manifest.metadata.adapter_type
+
+
 def parse_models(raw_manifest: dict, tag=None):
     manifest = models.DbtManifest(**raw_manifest)
     all_models = [
@@ -18,7 +23,7 @@ def parse_models(raw_manifest: dict, tag=None):
     ]
     filtered_models = (
         all_models if tag is None else [
-            model for model in models
+            model for model in all_models
             if tag in model.tags
         ]
     )
