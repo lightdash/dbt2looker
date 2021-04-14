@@ -1,3 +1,4 @@
+import argparse
 import json
 import pathlib
 import os
@@ -8,17 +9,38 @@ from . import generator
 MANIFEST_PATH = './manifest.json'
 LOOKML_OUTPUT_DIR = './lookml'
 
-def run():
-    # Load raw manifest file
-    with open(MANIFEST_PATH, 'r') as f:
-        raw_manifest = json.load(f)
 
-    # Validate manifest
+def get_manifest(prefix: str):
+    paths = pathlib.Path('./').rglob('manifest.json')
+    try:
+        path = next(paths)
+    except StopIteration:
+        raise SystemExit(f"No manifest.json file found in path {prefix}")
+    with open(path, 'r') as f:
+        raw_manifest = json.load(f)
     parser.validate(raw_manifest)
+    print(f'Detected valid manifest at {path}')
+    return raw_manifest
+
+
+def run():
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '--manifest',
+        help='Path to manifest.json file. Examples: ./target, manifest.json',
+        default='./'
+    )
+    argparser.add_argument(
+        '--tag',
+        help='Filter to dbt models using this tag'
+    )
+    args = argparser.parse_args()
+
+    # Load raw manifest file
+    raw_manifest = get_manifest(args.manifest)
 
     # Get dbt models from manifest
-    models = parser.parse_models(raw_manifest)
-    print(models)
+    models = parser.parse_models(raw_manifest, tag=args.tag)
 
     # Generate lookml files
     lookml_views = [

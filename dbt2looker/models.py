@@ -23,6 +23,7 @@ class DbtModel(DbtNode):
     name: str
     description: str
     columns: Dict[str, DbtModelColumn]
+    tags: List[str]
 
 
 class DbtManifest(BaseModel):
