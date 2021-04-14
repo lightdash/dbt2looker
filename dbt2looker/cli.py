@@ -57,19 +57,20 @@ def run():
     models = parser.parse_models(raw_manifest, tag=args.tag)
     catalog_nodes = parser.parse_catalog_nodes(raw_catalog)
 
-    # Generate lookml files
+    # Generate lookml views
     lookml_views = [
         generator.lookml_view_from_dbt_model(model, catalog_nodes)
         for model in models
     ]
-
-    lookml_model = generator.lookml_model_from_dbt_project(models)
-
-    # Write output
     pathlib.Path(LOOKML_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
         with open(os.path.join(LOOKML_OUTPUT_DIR, view.filename), 'w') as f:
             f.write(view.contents)
 
+    print(f'Generated {len(lookml_views)} lookml views in {LOOKML_OUTPUT_DIR}')
+
+    # Generate Lookml model
+    lookml_model = generator.lookml_model_from_dbt_project(models)
     with open(os.path.join(LOOKML_OUTPUT_DIR, lookml_model.filename), 'w') as f:
         f.write(lookml_model.contents)
+    print(f'Generated 1 lookml model in {LOOKML_OUTPUT_DIR}')
