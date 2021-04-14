@@ -2,7 +2,21 @@
 
 **Requires python >=3.7**
 
-Generate lookml for views from dbt models
+Use `dbt2looker` to generate Looker view files automatically from dbt models.
+
+### Usage
+
+Run `dbt2looker` in the root of your dbt project:
+
+**Generate Looker view files for all models:**
+```shell
+dbt2looker
+```
+
+**Generate Looker view files for all models tagged `prod`**
+```shell
+dbt2looker --tag prod
+```
 
 ## Install
 
