@@ -10,6 +10,8 @@ class UnsupportedDbtAdapterError(PydanticValueError):
 
 class SupportedDbtAdapters(str, Enum):
     bigquery = 'bigquery'
+    redshift = 'redshift'
+    snowflake = 'snowflake'
 
 
 class DbtProjectConfig(BaseModel):
