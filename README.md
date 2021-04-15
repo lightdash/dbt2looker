@@ -10,7 +10,7 @@ Use `dbt2looker` to generate Looker view files automatically from dbt models.
 * Creates dimension groups for datetime/timestamp/date types
 * Currently supports: BigQuery (snowflake, postgres to come)
 
-[![demo](docs/demo.gif)](https://asciinema.org/a/407407)
+[![demo](https://raw.githubusercontent.com/hubble-data/dbt2looker/main/docs/demo.gif)](https://asciinema.org/a/407407)
 
 ### Usage
 
