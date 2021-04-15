@@ -80,7 +80,11 @@ def run():
         default=logging.INFO,
     )
     args = argparser.parse_args()
-    logging.basicConfig(level=args.log_level)
+    logging.basicConfig(
+        level=args.log_level,
+        format='%(asctime)s %(levelname)-6s %(message)s',
+        datefmt='%H:%M:%S',
+    )
 
     # Load raw manifest file
     raw_manifest = get_manifest(args.target)
