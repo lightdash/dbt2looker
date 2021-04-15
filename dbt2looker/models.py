@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Union, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, PydanticValueError, validator
 
+
 class UnsupportedDbtAdapterError(PydanticValueError):
     code = 'unsupported_dbt_adapter'
     msg_template = '{wrong_value} is not a supported dbt adapter'
@@ -9,6 +10,10 @@ class UnsupportedDbtAdapterError(PydanticValueError):
 
 class SupportedDbtAdapters(str, Enum):
     bigquery = 'bigquery'
+
+
+class DbtProjectConfig(BaseModel):
+    name: str
 
 
 class LookViewFile(BaseModel):
@@ -24,6 +29,7 @@ class LookModelFile(BaseModel):
 class DbtModelColumn(BaseModel):
     name: str
     description: str
+    data_type: Optional[str]
 
 
 class DbtNode(BaseModel):

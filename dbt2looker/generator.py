@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 import lkml
 
@@ -11,15 +11,19 @@ map_to_looker_dtypes = {
         "NUMERIC":   "number",
         "BOOLEAN":   "yesno",
         "STRING":    "string",
-        "TIMESTAMP": "time",
-        "DATETIME":  "time",
-        "DATE":      "time",
-        "TIME":      "time",
+        "TIMESTAMP": "timestamp",
+        "DATETIME":  "datetime",
+        "DATE":      "date",
+        "TIME":      "string",    # Can time-only be handled better in looker?
         "BOOL":      "yesno",
         "ARRAY":     "string",
         "GEOGRAPHY": "string",
     }
 }
+
+looker_date_time_types = ['datetime', 'timestamp']
+looker_date_types = ['date']
+looker_scalar_types = ['number', 'yesno', 'string']
 
 looker_timeframes = [
     'raw',
@@ -32,26 +36,62 @@ looker_timeframes = [
 ]
 
 
-def get_column_type_from_catalog(catalog_nodes: Dict[str, models.DbtCatalogNode], model_id: str, column_name: str, adapter_type: models.SupportedDbtAdapters):
-    node = catalog_nodes.get(model_id)
-    column = None if node is None else node.columns.get(column_name)
-    return None if column is None else map_to_looker_dtypes[adapter_type].get(column.type)
+def lookml_date_time_dimension_group(column: models.DbtModelColumn, adapter_type: models.SupportedDbtAdapters):
+    return {
+        'name': column.name,
+        'type': 'time',
+        'sql': f'${{TABLE}}.{column.name}',
+        'description': column.description,
+        'datatype': map_to_looker_dtypes[adapter_type][column.data_type],
+        'timeframes': ['raw', 'time', 'hour', 'date', 'week', 'month', 'quarter', 'year']
+    }
 
 
-def lookml_view_from_dbt_model(model: models.DbtModel, catalog_nodes: Dict[str, models.DbtCatalogNode], adapter_type: models.SupportedDbtAdapters):
+def lookml_date_dimension_group(column: models.DbtModelColumn, adapter_type: models.SupportedDbtAdapters):
+    return {
+        'name': column.name,
+        'type': 'time',
+        'sql': f'${{TABLE}}.{column.name}',
+        'description': column.description,
+        'datatype': map_to_looker_dtypes[adapter_type][column.data_type],
+        'timeframes': ['raw', 'date', 'week', 'month', 'quarter', 'year']
+    }
+
+
+def lookml_dimension_groups_from_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
+    date_times = [
+        lookml_date_time_dimension_group(column, adapter_type)
+        for column in model.columns.values()
+        if map_to_looker_dtypes[adapter_type][column.data_type] in looker_date_time_types
+    ]
+    dates = [
+        lookml_date_dimension_group(column, adapter_type)
+        for column in model.columns.values()
+        if map_to_looker_dtypes[adapter_type][column.data_type] in looker_date_types
+    ]
+    return date_times + dates
+
+
+def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
+    return [
+        {
+            'name': column.name,
+            'type': map_to_looker_dtypes[adapter_type][column.data_type],
+            'sql': f'${{TABLE}}.{column.name}',
+            'description': column.description
+        }
+        for column in model.columns.values()
+        if map_to_looker_dtypes[adapter_type][column.data_type] in looker_scalar_types
+    ]
+
+
+def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
     lookml = {
         'view': {
             'name': model.name,
             'sql_table_name': f'{model.database}.{model.db_schema}.{model.name}',
-            'dimensions': [
-                {
-                    'name': column.name,
-                    'type': get_column_type_from_catalog(catalog_nodes, model.unique_id, column.name, adapter_type) or 'string',
-                    'description': column.description,
-                    'sql': f'${{TABLE}}.{column.name}'
-                }
-                for column in model.columns.values()
-            ]
+            'dimension_groups': lookml_dimension_groups_from_model(model, adapter_type),
+            'dimensions': lookml_dimensions_from_model(model, adapter_type),
         }
     }
     contents = lkml.dump(lookml)
