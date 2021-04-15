@@ -1,0 +1,6 @@
+connection: "hubble_analytics"
+include: "/views/*"
+
+explore: pages {
+  description: "Page views for Hubble landing page"
+}
