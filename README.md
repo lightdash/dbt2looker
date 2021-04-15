@@ -1,8 +1,8 @@
 # dbt2looker
 
-**Requires python >=3.7**
-
 Use `dbt2looker` to generate Looker view files automatically from dbt models.
+
+[![demo](docs/demo.gif)](https://asciinema.org/a/407407)
 
 ### Usage
 
