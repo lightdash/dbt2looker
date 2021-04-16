@@ -14,11 +14,10 @@ Use `dbt2looker` to generate Looker view files automatically from dbt models.
 
 ### Usage
 
-Run `dbt2looker` in the root of your dbt project after compiling looker docs.
+Run `dbt2looker` in the root of your dbt project *after compiling looker docs*.
 
 **Generate Looker view files for all models:**
 ```shell
-dbt compile
 dbt docs generate
 dbt2looker
 ```
