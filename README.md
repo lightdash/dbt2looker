@@ -4,15 +4,16 @@ Use `dbt2looker` to generate Looker view files automatically from dbt models.
 
 **Features**
 
-* Auto-generates a Looker view per dbt model
-* Supports dbt model and column-level descriptions
-* Automatically maps raw column types to looker types
-* Creates dimension groups for datetime/timestamp/date types
-* Currently supports: BigQuery, Snowflake, Redshift (postgres to come)
+* **Column descriptions** synced to looker
+* **Dimension** for each column in dbt model
+* **Dimension groups** for datetime/timestamp/date columns
+* **Measures** defined through dbt column `metadata` [see below](#defining-measures)
+* Looker types
+* Warehouses: BigQuery, Snowflake, Redshift (postgres to come)
 
 [![demo](https://raw.githubusercontent.com/hubble-data/dbt2looker/main/docs/demo.gif)](https://asciinema.org/a/407407)
 
-### Usage
+## Quickstart
 
 Run `dbt2looker` in the root of your dbt project *after compiling looker docs*.
 
@@ -55,4 +56,23 @@ poetry install
 
 # Run
 poetry run dbt2looker
+```
+
+## Defining measures
+
+You can define looker measures in your dbt `schema.yml` files. For example:
+
+```yaml
+models:
+  - name: pages
+    columns:
+      - name: url
+        description: "Page url"
+      - name: event_id
+        description: unique event id for page view
+        meta:
+          looker.com:  # looker config block for column
+             measures:
+               - name: Page views
+                 type: count
 ```

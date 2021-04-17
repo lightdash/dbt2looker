@@ -50,4 +50,9 @@ view: pages {
     sql: ${TABLE}.referring_domain ;;
     description: "Website domain of the referrer. e.g. google.com"
   }
+
+  measure: Page views {
+    type: count
+    sql: ${TABLE}.id ;;
+  }
 }

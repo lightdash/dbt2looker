@@ -3,6 +3,7 @@ from typing import Union, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, PydanticValueError, validator
 
 
+# dbt2looker utility types
 class UnsupportedDbtAdapterError(PydanticValueError):
     code = 'unsupported_dbt_adapter'
     msg_template = '{wrong_value} is not a supported dbt adapter'
@@ -14,10 +15,33 @@ class SupportedDbtAdapters(str, Enum):
     snowflake = 'snowflake'
 
 
-class DbtProjectConfig(BaseModel):
+# Lookml types
+class LookerAggregateMeasures(str, Enum):
+    average = 'average'
+    average_distinct = 'average_distinct'
+    count = 'count'
+    count_distinct = 'count_distinct'
+    list = 'list'
+    max = 'max'
+    median = 'median'
+    median_distinct = 'median_distinct'
+    min = 'min'
+    percentile = 'percentile'
+    percentile_distinct = 'percentile_distinct'
+    sum = 'sum'
+    sum_distinct = 'sum_distinct'
+
+
+class Dbt2LookerMeasure(BaseModel):
     name: str
+    type: LookerAggregateMeasures
 
 
+class Dbt2LookerMeta(BaseModel):
+    measures: Optional[List[Dbt2LookerMeasure]] = []
+
+
+# Looker file types
 class LookViewFile(BaseModel):
     filename: str
     contents: str
@@ -28,10 +52,20 @@ class LookModelFile(BaseModel):
     contents: str
 
 
+# dbt config types
+class DbtProjectConfig(BaseModel):
+    name: str
+
+
+class DbtModelColumnMeta(BaseModel):
+    looker: Optional[Dbt2LookerMeta] = Field(Dbt2LookerMeta(), alias='looker.com')
+
+
 class DbtModelColumn(BaseModel):
     name: str
     description: str
     data_type: Optional[str]
+    meta: DbtModelColumnMeta
 
 
 class DbtNode(BaseModel):

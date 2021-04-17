@@ -164,6 +164,18 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
     ]
 
 
+def lookml_measures_from_model(model: models.DbtModel):
+    return [
+        {
+            'name': measure.name,
+            'type': measure.type.value,
+            'sql': f'${{TABLE}}.{column.name}',
+        }
+        for column in model.columns.values()
+        for measure in column.meta.looker.measures
+    ]
+
+
 def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
     lookml = {
         'view': {
@@ -171,6 +183,7 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
             'sql_table_name': f'{model.database}.{model.db_schema}.{model.name}',
             'dimension_groups': lookml_dimension_groups_from_model(model, adapter_type),
             'dimensions': lookml_dimensions_from_model(model, adapter_type),
+            'measures': lookml_measures_from_model(model),
         }
     }
     contents = lkml.dump(lookml)

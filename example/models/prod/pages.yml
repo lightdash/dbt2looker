@@ -7,6 +7,11 @@ models:
     columns:
       - name: id
         description: "The primary key for this table"
+        meta:
+          looker.com:
+            measures:
+              - name: Page views
+                type: count
         tests:
             - unique
             - not_null
