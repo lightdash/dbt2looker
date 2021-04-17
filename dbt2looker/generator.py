@@ -170,6 +170,7 @@ def lookml_measures_from_model(model: models.DbtModel):
             'name': measure.name,
             'type': measure.type.value,
             'sql': f'${{TABLE}}.{column.name}',
+            'description': f'{measure.type.value.capitalize()} of {column.description}',
         }
         for column in model.columns.values()
         for measure in column.meta.looker.measures

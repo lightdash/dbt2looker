@@ -54,5 +54,6 @@ view: pages {
   measure: Page views {
     type: count
     sql: ${TABLE}.id ;;
+    description: "Count of The primary key for this table"
   }
 }
