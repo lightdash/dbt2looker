@@ -8,17 +8,16 @@ Use `dbt2looker` to generate Looker view files automatically from dbt models.
 * Supports dbt model and column-level descriptions
 * Automatically maps raw column types to looker types
 * Creates dimension groups for datetime/timestamp/date types
-* Currently supports: BigQuery (snowflake, postgres to come)
+* Currently supports: BigQuery, Snowflake, Redshift (postgres to come)
 
 [![demo](https://raw.githubusercontent.com/hubble-data/dbt2looker/main/docs/demo.gif)](https://asciinema.org/a/407407)
 
 ### Usage
 
-Run `dbt2looker` in the root of your dbt project after compiling looker docs.
+Run `dbt2looker` in the root of your dbt project *after compiling looker docs*.
 
 **Generate Looker view files for all models:**
 ```shell
-dbt compile
 dbt docs generate
 dbt2looker
 ```
