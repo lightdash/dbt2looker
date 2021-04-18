@@ -28,7 +28,7 @@ def get_manifest(prefix: str):
     with open(path, 'r') as f:
         raw_manifest = json.load(f)
     parser.validate_manifest(raw_manifest)    # FIX
-    logging.info(f'Detected valid manifest at {path}')
+    logging.debug(f'Detected valid manifest at {path}')
     return raw_manifest
 
 
@@ -42,7 +42,7 @@ def get_catalog(prefix: str):
     with open(path, 'r') as f:
         raw_catalog = json.load(f)
     parser.validate_catalog(raw_catalog)
-    logging.info(f'Detected valid catalog at {path}')
+    logging.debug(f'Detected valid catalog at {path}')
     return raw_catalog
 
 
@@ -55,7 +55,7 @@ def get_dbt_project_config(prefix: str):
         raise SystemExit('Failed') from e
     with open(path, 'r') as f:
         project_config = yaml.load(f, Loader=Loader)
-    logging.info(f'Detected valid dbt config at {path}')
+    logging.debug(f'Detected valid dbt config at {path}')
     return project_config
 
 

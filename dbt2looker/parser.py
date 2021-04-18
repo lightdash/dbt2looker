@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Optional
 
 from . import models
@@ -44,6 +45,14 @@ def parse_models(raw_manifest: dict, tag=None):
 def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
     catalog_nodes = parse_catalog_nodes(raw_catalog)
     dbt_models = parse_models(raw_manifest, tag=tag)
+    adapter_type = parse_adapter_type(raw_manifest)
+
+    # Check catalog for models
+    for model in dbt_models:
+        if model.unique_id not in catalog_nodes:
+            logging.warning(
+                f'Model {model.unique_id} not found in catalog. No looker view will be generated. '
+                f'Check if model has materialized in {adapter_type} at {model.database}.{model.db_schema}.{model.name}')
 
     # Update dbt models with data types from catalog
     dbt_typed_models = [
@@ -54,6 +63,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
             for column in model.columns.values()
         }})
         for model in dbt_models
+        if model.unique_id in catalog_nodes
     ]
     return dbt_typed_models
 

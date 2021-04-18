@@ -110,8 +110,8 @@ looker_timeframes = [
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(column_type)
-    if looker_type is None:
-        logging.warn(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
+    if (column_type is not None) and (looker_type is None):
+        logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
     return looker_type
 
 
