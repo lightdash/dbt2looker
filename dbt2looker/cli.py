@@ -78,13 +78,13 @@ def run():
     argparser.add_argument(
         '--log-level',
         help='Set level of logs. Default is INFO',
-        choices=[logging.DEBUG, logging.INFO, logging.WARN, logging.ERROR],
-        type=lambda x: getattr(logging, x),
-        default=logging.INFO,
+        choices=['DEBUG', 'INFO', 'WARN', 'ERROR'],
+        type=str,
+        default='INFO',
     )
     args = argparser.parse_args()
     logging.basicConfig(
-        level=args.log_level,
+        level=getattr(logging, args.log_level),
         format='%(asctime)s %(levelname)-6s %(message)s',
         datefmt='%H:%M:%S',
     )
