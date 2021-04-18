@@ -19,12 +19,13 @@ LOOKML_OUTPUT_DIR = './lookml'
 
 
 def get_manifest(prefix: str):
-    paths = pathlib.Path(prefix).rglob('manifest.json')
-    try:
-        path = next(paths)
-    except StopIteration as e:
+    paths = list(pathlib.Path(prefix).rglob('manifest.json'))
+    if len(paths) == 0:
         logging.error(f'No manifest.json file found in path {prefix}')
-        raise SystemExit('Failed') from e
+        raise SystemExit('Failed')
+    elif len(paths) > 1:
+        logging.warning(f'Multiple manifest.json files found in path {prefix} this can lead to unexpected behaviour')
+    path = paths[0]
     with open(path, 'r') as f:
         raw_manifest = json.load(f)
     parser.validate_manifest(raw_manifest)    # FIX
@@ -33,12 +34,13 @@ def get_manifest(prefix: str):
 
 
 def get_catalog(prefix: str):
-    paths = pathlib.Path(prefix).rglob('catalog.json')
-    try:
-        path = next(paths)
-    except StopIteration as e:
+    paths = list(pathlib.Path(prefix).rglob('catalog.json'))
+    if len(paths) == 0:
         logging.error(f'No catalog.json file found in path {prefix}')
-        raise SystemExit('Failed') from e
+        raise SystemExit('Failed')
+    elif len(paths) > 1:
+        logging.warning(f'Multiple catalog.json files found in path {prefix} this can lead to unexpected behaviour')
+    path = paths[0]
     with open(path, 'r') as f:
         raw_catalog = json.load(f)
     parser.validate_catalog(raw_catalog)
@@ -47,12 +49,13 @@ def get_catalog(prefix: str):
 
 
 def get_dbt_project_config(prefix: str):
-    paths = pathlib.Path(prefix).rglob('dbt_project.yml')
-    try:
-        path = next(paths)
-    except StopIteration as e:
+    paths = list(pathlib.Path(prefix).rglob('dbt_project.yml'))
+    if len(paths) == 0:
         logging.error(f'No dbt_project.yml file found in path {prefix}')
-        raise SystemExit('Failed') from e
+        raise SystemExit('Failed')
+    elif len(paths) > 1:
+        logging.warning(f'Multiple dbt_project.yml files found in path {prefix} this can lead to unexpected behaviour')
+    path = paths[0]
     with open(path, 'r') as f:
         project_config = yaml.load(f, Loader=Loader)
     logging.debug(f'Detected valid dbt config at {path}')
