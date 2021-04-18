@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from . import models
 
@@ -42,10 +42,18 @@ def parse_models(raw_manifest: dict, tag=None):
     return filtered_models
 
 
+def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):
+    for model in dbt_typed_models:
+        if all([col.data_type is None for col in model.columns.values()]):
+            logging.debug('Model %s has no typed columns, no dimensions will be generated. %s', model.unique_id, model)
+
+
 def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
     catalog_nodes = parse_catalog_nodes(raw_catalog)
     dbt_models = parse_models(raw_manifest, tag=tag)
     adapter_type = parse_adapter_type(raw_manifest)
+
+    logging.debug('Parsed %d models from manifest.json', len(dbt_models))
 
     # Check catalog for models
     for model in dbt_models:
@@ -65,6 +73,9 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
         for model in dbt_models
         if model.unique_id in catalog_nodes
     ]
+    logging.debug('Found catalog entries for %d models', len(dbt_typed_models))
+    logging.debug('Catalog entries missing for %d models', len(dbt_models) - len(dbt_typed_models))
+    check_models_for_missing_column_types(dbt_typed_models)
     return dbt_typed_models
 
 

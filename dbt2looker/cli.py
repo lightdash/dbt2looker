@@ -78,7 +78,7 @@ def run():
     argparser.add_argument(
         '--log-level',
         help='Set level of logs. Default is INFO',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+        choices=[logging.DEBUG, logging.INFO, logging.WARN, logging.ERROR],
         type=lambda x: getattr(logging, x),
         default=logging.INFO,
     )
