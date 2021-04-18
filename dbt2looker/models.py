@@ -82,6 +82,13 @@ class DbtModel(DbtNode):
     columns: Dict[str, DbtModelColumn]
     tags: List[str]
 
+    @validator('columns')
+    def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):
+        return {
+            name.lower(): column.copy(update={'name': column.name.lower()})
+            for name, column in v.items()
+        }
+
 
 class DbtManifestMetadata(BaseModel):
     adapter_type: str
@@ -119,6 +126,13 @@ class DbtCatalogNodeColumn(BaseModel):
 class DbtCatalogNode(BaseModel):
     metadata: DbtCatalogNodeMetadata
     columns: Dict[str, DbtCatalogNodeColumn]
+
+    @validator('columns')
+    def case_insensitive_column_names(cls, v: Dict[str, DbtCatalogNodeColumn]):
+        return {
+            name.lower(): column.copy(update={'name': column.name.lower()})
+            for name, column in v.items()
+        }
 
 
 class DbtCatalog(BaseModel):
