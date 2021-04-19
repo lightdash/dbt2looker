@@ -27,8 +27,8 @@ class LookerAggregateMeasures(str, Enum):
     median = 'median'
     median_distinct = 'median_distinct'
     min = 'min'
-    percentile = 'percentile'
-    percentile_distinct = 'percentile_distinct'
+    # percentile = 'percentile'
+    # percentile_distinct = 'percentile_distinct'
     sum = 'sum'
     sum_distinct = 'sum_distinct'
 
