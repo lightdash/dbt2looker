@@ -90,6 +90,69 @@ LOOKER_DTYPE_MAP = {
         'TIME WITHOUT TIME ZONE': 'string',
         # TIMETZ not supported
         # TIME WITH TIME ZONE not supported
+    },
+    'postgres': {
+        # BIT, BIT VARYING, VARBIT not supported
+        # BOX not supported
+        # BYTEA not supported
+        # CIRCLE not supported
+        # INTERVAL not supported
+        # LINE not supported
+        # LSEG not supported
+        # PATH not supported
+        # POINT not supported
+        # POLYGON not supported
+        # TSQUERY, TSVECTOR not supported
+        'XML': 'string',
+        'UUID': 'string',
+        'PG_LSN': 'string',
+        'MACADDR': 'string',
+        'JSON': 'string',
+        'JSONB': 'string',
+        'CIDR': 'string',
+        'INET': 'string',
+        'MONEY': 'number',
+        'SMALLINT': 'number',
+        'INT2': 'number',
+        'SMALLSERIAL': 'number',
+        'SERIAL2': 'number',
+        'INTEGER': 'number',
+        'INT': 'number',
+        'INT4': 'number',
+        'SERIAL': 'number',
+        'SERIAL4': 'number',
+        'BIGINT': 'number',
+        'INT8': 'number',
+        'BIGSERIAL': 'number',
+        'SERIAL8': 'number',
+        'DECIMAL': 'number',
+        'NUMERIC': 'number',
+        'REAL': 'number',
+        'FLOAT4': 'number',
+        'DOUBLE PRECISION': 'number',
+        'FLOAT8': 'number',
+        'FLOAT': 'number',
+        'BOOLEAN': 'yesno',
+        'BOOL': 'yesno',
+        'CHAR': 'string',
+        'CHARACTER': 'string',
+        'NCHAR': 'string',
+        'BPCHAR': 'string',
+        'VARCHAR': 'string',
+        'CHARACTER VARYING': 'string',
+        'NVARCHAR': 'string',
+        'TEXT': 'string',
+        'DATE': 'date',
+        'TIMESTAMP': 'timestamp',
+        'TIMESTAMP WITHOUT TIME ZONE': 'timestamp',
+        # TIMESTAMPTZ not supported
+        # TIMESTAMP WITH TIME ZONE not supported
+        'GEOMETRY': 'string',
+        # HLLSKETCH not supported
+        'TIME': 'string',
+        'TIME WITHOUT TIME ZONE': 'string',
+        # TIMETZ not supported
+        # TIME WITH TIME ZONE not supported
     }
 }
 

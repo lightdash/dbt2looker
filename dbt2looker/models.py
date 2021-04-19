@@ -11,6 +11,7 @@ class UnsupportedDbtAdapterError(PydanticValueError):
 
 class SupportedDbtAdapters(str, Enum):
     bigquery = 'bigquery'
+    postgres = 'postgres'
     redshift = 'redshift'
     snowflake = 'snowflake'
 
