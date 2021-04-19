@@ -10,8 +10,12 @@ models:
         meta:
           looker.com:
             measures:
-              - name: Page views
+              - name: Total page views
                 type: count
+              - name: Blog views
+                type: count
+                filters:
+                  - path: "/blog%"
         tests:
             - unique
             - not_null

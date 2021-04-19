@@ -35,6 +35,7 @@ class LookerAggregateMeasures(str, Enum):
 class Dbt2LookerMeasure(BaseModel):
     name: str
     type: LookerAggregateMeasures
+    filters: Optional[List[Dict[str, str]]] = []
 
 
 class Dbt2LookerMeta(BaseModel):

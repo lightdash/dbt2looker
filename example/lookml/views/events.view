@@ -1,0 +1,3 @@
+view: events {
+  sql_table_name: alpine-land-278512.dbt.events ;;
+}

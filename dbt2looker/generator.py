@@ -171,6 +171,7 @@ def lookml_measures_from_model(model: models.DbtModel):
             'type': measure.type.value,
             'sql': f'${{TABLE}}.{column.name}',
             'description': f'{measure.type.value.capitalize()} of {column.description}',
+            **({'filters': measure.filters} if measure.filters else {})
         }
         for column in model.columns.values()
         for measure in column.meta.looker.measures
