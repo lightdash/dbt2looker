@@ -283,18 +283,35 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     return models.LookViewFile(filename=filename, contents=contents)
 
 
-def lookml_model_from_dbt_project(dbt_models: List[models.DbtModel], dbt_project_name: str):
+def lookml_join_on_sql(left: str, right: str, left_on: str, right_on: str):
+    return f'${{{left}.{left_on}}} = ${{{right}.{right_on}}}'
+
+
+def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
+    # Note: assumes view names = model names
+    #       and models are unique across dbt packages in project
     lookml = {
         'connection': dbt_project_name,
         'include': '/views/*',
-        'explores': [
-            {
-                'name': model.name,
-                'description': model.description,
-            }
-            for model in dbt_models
-        ]
+        'explore': {
+            'name': model.name,
+            'description': model.description,
+            'joins': [
+                {
+                    'name': model_name,
+                    'type': join.type.value,
+                    'relationship': join.relationship.value,
+                    'sql_on': lookml_join_on_sql(
+                        left=model.name,
+                        left_on=join.left_on,
+                        right=model_name,
+                        right_on=join.right_on,
+                    )
+                }
+                for model_name, join in model.meta.looker.joins.items()
+            ]
+        }
     }
     contents = lkml.dump(lookml)
-    filename = f'{dbt_project_name}.model'
+    filename = f'{model.name}.model'
     return models.LookModelFile(filename=filename, contents=contents)

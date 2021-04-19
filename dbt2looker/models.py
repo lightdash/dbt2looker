@@ -33,6 +33,20 @@ class LookerAggregateMeasures(str, Enum):
     sum_distinct = 'sum_distinct'
 
 
+class LookerJoinType(str, Enum):
+    left_outer = 'left_outer'
+    full_outer = 'full_outer'
+    inner = 'inner'
+    cross = 'cross'
+
+
+class LookerJoinRelationship(str, Enum):
+    many_to_one = 'many_to_one'
+    many_to_many = 'many_to_many'
+    one_to_many = 'one_to_many'
+    one_to_one = 'one_to_one'
+
+
 class Dbt2LookerMeasure(BaseModel):
     type: LookerAggregateMeasures
     filters: Optional[List[Dict[str, str]]] = []
@@ -89,6 +103,21 @@ class DbtNode(BaseModel):
     resource_type: str
 
 
+class Dbt2LookerExploreJoin(BaseModel):
+    type: Optional[LookerJoinType] = LookerJoinType.left_outer
+    relationship: Optional[LookerJoinRelationship] = LookerJoinRelationship.many_to_one
+    left_on: str
+    right_on: str
+
+
+class Dbt2LookerModelMeta(BaseModel):
+    joins: Optional[Dict[str, Dbt2LookerExploreJoin]] = {}
+
+
+class DbtModelMeta(BaseModel):
+    looker: Optional[Dbt2LookerModelMeta] = Field(Dbt2LookerModelMeta(), alias='looker.com')
+
+
 class DbtModel(DbtNode):
     resource_type: Literal['model']
     database: str
@@ -97,6 +126,7 @@ class DbtModel(DbtNode):
     description: str
     columns: Dict[str, DbtModelColumn]
     tags: List[str]
+    meta: DbtModelMeta
 
     @validator('columns')
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):

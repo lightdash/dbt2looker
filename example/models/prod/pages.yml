@@ -40,3 +40,16 @@ models:
         description: "Timestamp that page was viewed at"
       - name: date
         description: "Date that the page was viewed at"
+      - name: user_id
+        description: "persistent id of the user viewing the page"
+
+    # Optionally - specify how other models join to this table and an explore will be generated
+    meta:
+      looker.com:
+        joins:
+          users:          # Reference another dbt model to join to
+            type: left_outer           # Optional - left_outer is default
+            relationship: many_to_one  # Optional - many_to_one is default
+            left_on: user_id           # left column to join on (i.e. user_id in pages)
+            right_on: id               # right column to join on (i.e. id in users)
+            

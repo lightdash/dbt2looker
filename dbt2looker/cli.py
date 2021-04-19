@@ -111,9 +111,13 @@ def run():
 
     logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(LOOKML_OUTPUT_DIR, "views")}')
 
-    # Generate Lookml model
-    lookml_model = generator.lookml_model_from_dbt_project(typed_dbt_models, dbt_project_name=dbt_project_config.name)
-    with open(os.path.join(LOOKML_OUTPUT_DIR, lookml_model.filename), 'w') as f:
-        f.write(lookml_model.contents)
-    logging.info(f'Generated 1 lookml model in {LOOKML_OUTPUT_DIR}')
+    # Generate Lookml models
+    lookml_models = [
+        generator.lookml_model_from_dbt_model(model, dbt_project_config.name)
+        for model in typed_dbt_models
+    ]
+    for model in lookml_models:
+        with open(os.path.join(LOOKML_OUTPUT_DIR, model.filename), 'w') as f:
+            f.write(model.contents)
+    logging.info(f'Generated {len(lookml_models)} lookml models in {LOOKML_OUTPUT_DIR}')
     logging.info('Success')
