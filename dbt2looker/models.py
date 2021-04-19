@@ -39,6 +39,14 @@ class Dbt2LookerMeasure(BaseModel):
     name: Optional[str]
     description: Optional[str]
 
+    @validator('filters')
+    def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
+        if v is not None:
+            for f in v:
+                if len(f) != 1:
+                    raise ValueError('Multiple filter names provided for a single filter in measure block')
+        return v
+
 
 class Dbt2LookerDimension(BaseModel):
     name: Optional[str]

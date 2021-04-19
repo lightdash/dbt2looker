@@ -214,10 +214,14 @@ def lookml_dimension_groups_from_model(model: models.DbtModel, adapter_type: mod
     return date_times + dates
 
 
+def lookml_dimension_name_from_column(column: models.DbtModelColumn):
+    return column.meta.looker.dimension.name or column.name
+
+
 def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
     return [
         {
-            'name': column.meta.looker.dimension.name or column.name,
+            'name': lookml_dimension_name_from_column(column),
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': f'${{TABLE}}.{column.name}',
             'description': column.description
@@ -227,6 +231,24 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
     ]
 
 
+def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtModel):
+    try:
+        columns = {
+            column_name: model.columns[column_name]
+            for f in measure.filters
+            for column_name in f
+        }
+    except KeyError as e:
+        raise ValueError(
+            f'Model {model.unique_id} contains a measure that references a non_existent column: {e}\n'
+            f'Ensure that dbt model {model.unique_id} contains a column: {e}'
+        ) from e
+    return [{
+        lookml_dimension_name_from_column(columns[column_name]): fexpr
+        for column_name, fexpr in f.items()
+    } for f in measure.filters]
+
+
 def lookml_measures_from_model(model: models.DbtModel):
     return [
         {
@@ -234,7 +256,12 @@ def lookml_measures_from_model(model: models.DbtModel):
             'type': measure.type.value,
             'sql': f'${{TABLE}}.{column.name}',
             'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
-            **({'filters': measure.filters} if measure.filters else {})
+
+            # Filters must reference a valid column in the dbt manifest
+            **(
+                {'filters': lookml_measure_filters(measure, model)}
+                if measure.filters else {}
+            )
         }
         for column in model.columns.values()
         for measure in column.meta.looker.measures
