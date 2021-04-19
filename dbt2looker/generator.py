@@ -154,7 +154,7 @@ def lookml_dimension_groups_from_model(model: models.DbtModel, adapter_type: mod
 def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
     return [
         {
-            'name': column.name,
+            'name': column.meta.looker.dimension.name or column.name,
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': f'${{TABLE}}.{column.name}',
             'description': column.description
@@ -167,10 +167,10 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
 def lookml_measures_from_model(model: models.DbtModel):
     return [
         {
-            'name': measure.name,
+            'name': measure.name or f'{measure.type.value} of {column.name}',
             'type': measure.type.value,
             'sql': f'${{TABLE}}.{column.name}',
-            'description': f'{measure.type.value.capitalize()} of {column.description}',
+            'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
             **({'filters': measure.filters} if measure.filters else {})
         }
         for column in model.columns.values()

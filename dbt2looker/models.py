@@ -33,13 +33,19 @@ class LookerAggregateMeasures(str, Enum):
 
 
 class Dbt2LookerMeasure(BaseModel):
-    name: str
     type: LookerAggregateMeasures
     filters: Optional[List[Dict[str, str]]] = []
+    name: Optional[str]
+    description: Optional[str]
+
+
+class Dbt2LookerDimension(BaseModel):
+    name: Optional[str]
 
 
 class Dbt2LookerMeta(BaseModel):
     measures: Optional[List[Dbt2LookerMeasure]] = []
+    dimension: Optional[Dbt2LookerDimension] = Dbt2LookerDimension()
 
 
 # Looker file types

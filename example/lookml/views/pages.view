@@ -33,16 +33,16 @@ view: pages {
     ]
   }
 
-  dimension: id {
-    type: string
-    sql: ${TABLE}.id ;;
-    description: "The primary key for this table"
-  }
-
   dimension: path {
     type: string
     sql: ${TABLE}.path ;;
     description: "The page path. Everything after https://gethubble.io."
+  }
+
+  dimension: Unique page view id {
+    type: string
+    sql: ${TABLE}.id ;;
+    description: "The primary key for this table"
   }
 
   dimension: referring_domain {
