@@ -7,6 +7,7 @@ from . import models
 
 LOOKER_DTYPE_MAP = {
     'bigquery': {
+        'INT64':     'number',
         'INTEGER':   'number',
         'FLOAT':     'number',
         'NUMERIC':   'number',
