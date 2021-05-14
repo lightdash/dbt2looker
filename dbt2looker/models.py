@@ -50,8 +50,8 @@ class LookerJoinRelationship(str, Enum):
 class Dbt2LookerMeasure(BaseModel):
     type: LookerAggregateMeasures
     filters: Optional[List[Dict[str, str]]] = []
-    name: Optional[str]
     description: Optional[str]
+    sql: Optional[str]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
@@ -64,10 +64,12 @@ class Dbt2LookerMeasure(BaseModel):
 
 class Dbt2LookerDimension(BaseModel):
     name: Optional[str]
+    sql: Optional[str]
+    description: Optional[str]
 
 
 class Dbt2LookerMeta(BaseModel):
-    measures: Optional[List[Dbt2LookerMeasure]] = []
+    measures: Optional[Dict[str, Dbt2LookerMeasure]] = {}
     dimension: Optional[Dbt2LookerDimension] = Dbt2LookerDimension()
 
 
@@ -87,8 +89,8 @@ class DbtProjectConfig(BaseModel):
     name: str
 
 
-class DbtModelColumnMeta(BaseModel):
-    looker: Optional[Dbt2LookerMeta] = Field(Dbt2LookerMeta(), alias='looker.com')
+class DbtModelColumnMeta(Dbt2LookerMeta):
+    pass
 
 
 class DbtModelColumn(BaseModel):
@@ -104,18 +106,18 @@ class DbtNode(BaseModel):
 
 
 class Dbt2LookerExploreJoin(BaseModel):
+    join: str
     type: Optional[LookerJoinType] = LookerJoinType.left_outer
     relationship: Optional[LookerJoinRelationship] = LookerJoinRelationship.many_to_one
-    left_on: str
-    right_on: str
+    sql_on: str
 
 
 class Dbt2LookerModelMeta(BaseModel):
-    joins: Optional[Dict[str, Dbt2LookerExploreJoin]] = {}
+    joins: Optional[List[Dbt2LookerExploreJoin]] = []
 
 
-class DbtModelMeta(BaseModel):
-    looker: Optional[Dbt2LookerModelMeta] = Field(Dbt2LookerModelMeta(), alias='looker.com')
+class DbtModelMeta(Dbt2LookerModelMeta):
+    pass
 
 
 class DbtModel(DbtNode):

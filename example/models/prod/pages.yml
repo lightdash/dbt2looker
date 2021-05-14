@@ -3,7 +3,7 @@ version: 2
 # A looker view is created for each model
 models:
 
-  # No additional config needed. Name of and description of model used for view
+  # No additional config needed. Name and description of dbt model used for looker view
   - name: pages
     description: "Page views for Hubble landing page"
 
@@ -11,7 +11,7 @@ models:
     # A dimension is created for each column
     columns:
 
-      # No additional config needed. dimension has column name and description
+      # No additional config needed. dimension takes column name and description from dbt
       - name: path
         description: "The page path. Everything after https://gethubble.io."
 
@@ -19,20 +19,19 @@ models:
       - name: id
         description: "The primary key for this table"
         meta:
-          looker.com:
 
-            # Optional - override the dimension name for this column
-            dimension:
-              name: Unique page view id
+          # Optional - override the dimension name for this column
+          dimension:
+            name: Unique page view id
 
-            # Optional - add measures based on this column
-            measures:
-              - name: Total page views
-                type: count        # any looker aggregate measure
-              - name: Blog views
-                type: count
-                filters:
-                  - path: "/blog%"    # must filter on a valid dimension name
+          # Optional - add measures based on this column
+          measures:
+            total_page_views:
+              type: count        # any looker aggregate measure
+            blog_views:
+              type: count
+              filters:
+                - path: "/blog%"    # must filter on a valid dimension name
 
       - name: referring_domain
         description: "Website domain of the referrer. e.g. google.com"
@@ -45,11 +44,10 @@ models:
 
     # Optionally - specify how other models join to this table and an explore will be generated
     meta:
-      looker.com:
-        joins:
-          users:          # Reference another dbt model to join to
-            type: left_outer           # Optional - left_outer is default
-            relationship: many_to_one  # Optional - many_to_one is default
-            left_on: user_id           # left column to join on (i.e. user_id in pages)
-            right_on: id               # right column to join on (i.e. id in users)
+      joins:
+        - name: users                # Reference another dbt model to join to
+          type: left_outer           # Optional - left_outer is default
+          relationship: many_to_one  # Optional - many_to_one is default
+          left_on: user_id           # left column to join on (i.e. user_id in pages)
+          right_on: id               # right column to join on (i.e. id in users)
             
