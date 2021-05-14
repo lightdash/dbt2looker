@@ -220,7 +220,13 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
             'name': column.meta.dimension.name or column.name,
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
-            'description': column.meta.dimension.description or column.description
+            'description': column.meta.dimension.description or column.description,
+            **(
+                {'value_format_name': column.meta.dimension.value_format_name.value}
+                if (column.meta.dimension.value_format_name
+                    and map_adapter_type_to_looker(adapter_type, column.data_type) == 'number')
+                else {}
+            )
         }
         for column in model.columns.values()
         if map_adapter_type_to_looker(adapter_type, column.data_type) in looker_scalar_types
@@ -247,21 +253,24 @@ def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtM
 
 def lookml_measures_from_model(model: models.DbtModel):
     return [
-        {
-            'name': measure_name,
-            'type': measure.type.value,
-            'sql': measure.sql or f'${{TABLE}}.{column.name}',
-            'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
-
-            # Filters must reference a valid dimension in the dbt manifest
-            **(
-                {'filters': lookml_measure_filters(measure, model)}
-                if measure.filters else {}
-            )
-        }
+        lookml_measure(measure_name, column, measure, model)
         for column in model.columns.values()
         for measure_name, measure in column.meta.measures.items()
     ]
+
+
+def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: models.Dbt2LookerMeasure, model: models.DbtModel):
+    m = {
+        'name': measure_name,
+        'type': measure.type.value,
+        'sql': measure.sql or f'${{TABLE}}.{column.name}',
+        'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
+    }
+    if measure.filters:
+        m['filters'] = lookml_measure_filters(measure, model)
+    if measure.value_format_name:
+        m['value_format_name'] = measure.value_format_name.value
+    return m
 
 
 def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
