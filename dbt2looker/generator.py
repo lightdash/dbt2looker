@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import lkml
 
@@ -181,10 +180,10 @@ def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column
 
 def lookml_date_time_dimension_group(column: models.DbtModelColumn, adapter_type: models.SupportedDbtAdapters):
     return {
-        'name': column.name,
+        'name': column.meta.dimension.name or column.name,
         'type': 'time',
-        'sql': f'${{TABLE}}.{column.name}',
-        'description': column.description,
+        'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
+        'description': column.meta.dimension.description or column.description,
         'datatype': map_adapter_type_to_looker(adapter_type, column.data_type),
         'timeframes': ['raw', 'time', 'hour', 'date', 'week', 'month', 'quarter', 'year']
     }
@@ -192,10 +191,10 @@ def lookml_date_time_dimension_group(column: models.DbtModelColumn, adapter_type
 
 def lookml_date_dimension_group(column: models.DbtModelColumn, adapter_type: models.SupportedDbtAdapters):
     return {
-        'name': column.name,
+        'name': column.meta.dimension.name or column.name,
         'type': 'time',
-        'sql': f'${{TABLE}}.{column.name}',
-        'description': column.description,
+        'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
+        'description': column.meta.dimension.description or column.description,
         'datatype': map_adapter_type_to_looker(adapter_type, column.data_type),
         'timeframes': ['raw', 'date', 'week', 'month', 'quarter', 'year']
     }
@@ -215,17 +214,13 @@ def lookml_dimension_groups_from_model(model: models.DbtModel, adapter_type: mod
     return date_times + dates
 
 
-def lookml_dimension_name_from_column(column: models.DbtModelColumn):
-    return column.meta.looker.dimension.name or column.name
-
-
 def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
     return [
         {
-            'name': lookml_dimension_name_from_column(column),
+            'name': column.meta.dimension.name or column.name,
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
-            'sql': f'${{TABLE}}.{column.name}',
-            'description': column.description
+            'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
+            'description': column.meta.dimension.description or column.description
         }
         for column in model.columns.values()
         if map_adapter_type_to_looker(adapter_type, column.data_type) in looker_scalar_types
@@ -245,7 +240,7 @@ def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtM
             f'Ensure that dbt model {model.unique_id} contains a column: {e}'
         ) from e
     return [{
-        lookml_dimension_name_from_column(columns[column_name]): fexpr
+        (columns[column_name].meta.dimension.name or column_name): fexpr
         for column_name, fexpr in f.items()
     } for f in measure.filters]
 
@@ -253,19 +248,19 @@ def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtM
 def lookml_measures_from_model(model: models.DbtModel):
     return [
         {
-            'name': measure.name or f'{measure.type.value} of {column.name}',
+            'name': measure_name,
             'type': measure.type.value,
-            'sql': f'${{TABLE}}.{column.name}',
+            'sql': measure.sql or f'${{TABLE}}.{column.name}',
             'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
 
-            # Filters must reference a valid column in the dbt manifest
+            # Filters must reference a valid dimension in the dbt manifest
             **(
                 {'filters': lookml_measure_filters(measure, model)}
                 if measure.filters else {}
             )
         }
         for column in model.columns.values()
-        for measure in column.meta.looker.measures
+        for measure_name, measure in column.meta.measures.items()
     ]
 
 
@@ -284,10 +279,6 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     return models.LookViewFile(filename=filename, contents=contents)
 
 
-def lookml_join_on_sql(left: str, right: str, left_on: str, right_on: str):
-    return f'${{{left}.{left_on}}} = ${{{right}.{right_on}}}'
-
-
 def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
@@ -299,17 +290,12 @@ def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
             'description': model.description,
             'joins': [
                 {
-                    'name': model_name,
+                    'name': join.join,
                     'type': join.type.value,
                     'relationship': join.relationship.value,
-                    'sql_on': lookml_join_on_sql(
-                        left=model.name,
-                        left_on=join.left_on,
-                        right=model_name,
-                        right_on=join.right_on,
-                    )
+                    'sql_on': join.sql_on,
                 }
-                for model_name, join in model.meta.looker.joins.items()
+                for join in model.meta.joins
             ]
         }
     }

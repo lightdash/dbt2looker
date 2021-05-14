@@ -28,7 +28,7 @@ def get_manifest(prefix: str):
     path = paths[0]
     with open(path, 'r') as f:
         raw_manifest = json.load(f)
-    parser.validate_manifest(raw_manifest)    # FIX
+    parser.validate_manifest(raw_manifest)
     logging.debug(f'Detected valid manifest at {path}')
     return raw_manifest
 

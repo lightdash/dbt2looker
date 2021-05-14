@@ -1,11 +1,30 @@
 import logging
+import json
+import jsonschema
+import importlib.resources
 from typing import Dict, Optional, List
 
 from . import models
 
 
 def validate_manifest(raw_manifest: dict):
+    with importlib.resources.open_text("dbt2looker.dbt_json_schemas", "manifest_dbt2looker.json") as f:
+        schema = json.load(f)
+    v = jsonschema.Draft7Validator(schema)
+    hasError = False
+    for error in v.iter_errors(raw_manifest):
+        raise_error_context(error)
+        hasError = True
+    if hasError:
+        raise ValueError("Failed to parse dbt manifest.json")
     return True
+
+
+def raise_error_context(error: jsonschema.ValidationError, offset=''):
+    for error in sorted(error.context, key=lambda e: e.schema_path):
+        raise_error_context(error, offset=offset + '  ')
+    path = '.'.join(list(error.absolute_path))
+    logging.error(f'{offset}Error in manifest at {path}: {error.message}')
 
 
 def validate_catalog(raw_catalog: dict):
