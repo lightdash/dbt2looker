@@ -222,6 +222,18 @@
         "sql": {
           "type": "string",
           "description": "Optional sql string defining the dimension. Defaults to ${TABLE}.column_name"
+        },
+        "value_format_name": {
+          "description": "Optional format for numerical dimensions",
+          "type": "string",
+          "enum": [
+            "decimal_0", "decimal_1", "decimal_2", "decimal_3", "decimal_4",
+            "usd_0", "usd",
+            "gbp_0", "gbp",
+            "eur_0", "eur",
+            "id",
+            "percent_0", "percent_1", "percent_2", "percent_3", "percent_4"
+          ]
         }
       }
     },
@@ -253,6 +265,18 @@
         "sql": {
           "description": "Optional sql string defining the measure value. Defaults ${TABLE}.column_name",
           "type": "string"
+        },
+        "value_format_name": {
+          "description": "Optional format for measure",
+          "type": "string",
+          "enum": [
+            "decimal_0", "decimal_1", "decimal_2", "decimal_3", "decimal_4",
+            "usd_0", "usd",
+            "gbp_0", "gbp",
+            "eur_0", "eur",
+            "id",
+            "percent_0", "percent_1", "percent_2", "percent_3", "percent_4"
+          ]
         },
         "filters": {
           "type": "array",

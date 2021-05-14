@@ -47,11 +47,32 @@ class LookerJoinRelationship(str, Enum):
     one_to_one = 'one_to_one'
 
 
+class LookerValueFormatName(str, Enum):
+    decimal_0 = 'decimal_0'
+    decimal_1 = 'decimal_1'
+    decimal_2 = 'decimal_2'
+    decimal_3 = 'decimal_3'
+    decimal_4 = 'decimal_4'
+    usd_0 = 'usd_0'
+    usd = 'usd'
+    gbp_0 = 'gbp_0'
+    gbp = 'gbp'
+    eur_0 = 'eur_0'
+    eur = 'eur'
+    id = 'id'
+    percent_0 = 'percent_0'
+    percent_1 = 'percent_1'
+    percent_2 = 'percent_2'
+    percent_3 = 'percent_3'
+    percent_4 = 'percent_4'
+
+
 class Dbt2LookerMeasure(BaseModel):
     type: LookerAggregateMeasures
     filters: Optional[List[Dict[str, str]]] = []
     description: Optional[str]
     sql: Optional[str]
+    value_format_name: Optional[LookerValueFormatName]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
@@ -66,6 +87,7 @@ class Dbt2LookerDimension(BaseModel):
     name: Optional[str]
     sql: Optional[str]
     description: Optional[str]
+    value_format_name: Optional[LookerValueFormatName]
 
 
 class Dbt2LookerMeta(BaseModel):
