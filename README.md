@@ -73,6 +73,6 @@ models:
         meta:
           looker.com:  # looker config block for column
              measures:
-               - name: Page views
+               page_views:
                  type: count
 ```
