@@ -71,8 +71,7 @@ models:
       - name: event_id
         description: unique event id for page view
         meta:
-          looker.com:  # looker config block for column
-             measures:
-               page_views:
-                 type: count
+           measures:
+             page_views:
+               type: count
 ```
