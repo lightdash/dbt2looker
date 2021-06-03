@@ -2,6 +2,8 @@
 
 Use `dbt2looker` to generate Looker view files automatically from dbt models.
 
+Want a deeper integration between dbt and your BI tool? You should also checkout [Lightdash - the open source alternative to Looker](https://github.com/lightdash/lightdash)
+
 **Features**
 
 * **Column descriptions** synced to looker
