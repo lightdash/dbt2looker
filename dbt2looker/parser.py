@@ -23,7 +23,7 @@ def validate_manifest(raw_manifest: dict):
 def raise_error_context(error: jsonschema.ValidationError, offset=''):
     for error in sorted(error.context, key=lambda e: e.schema_path):
         raise_error_context(error, offset=offset + '  ')
-    path = '.'.join(list(error.absolute_path))
+    path = '.'.join([str(p) for p in error.absolute_path])
     logging.error(f'{offset}Error in manifest at {path}: {error.message}')
 
 
