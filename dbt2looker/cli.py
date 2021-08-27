@@ -15,7 +15,7 @@ from . import parser
 from . import generator
 
 MANIFEST_PATH = './manifest.json'
-LOOKML_OUTPUT_DIR = './lookml'
+DEFAULT_LOOKML_OUTPUT_DIR = './lookml'
 
 
 def get_manifest(prefix: str):
@@ -82,6 +82,12 @@ def run():
         type=str,
         default='INFO',
     )
+    argparser.add_argument(
+        '--output-dir',
+        help='Path to a directory that will contain the generated lookml files',
+        default=DEFAULT_LOOKML_OUTPUT_DIR,
+        type=str,
+    )
     args = argparser.parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),
@@ -104,12 +110,12 @@ def run():
         generator.lookml_view_from_dbt_model(model, adapter_type)
         for model in typed_dbt_models
     ]
-    pathlib.Path(os.path.join(LOOKML_OUTPUT_DIR, 'views')).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(os.path.join(args.output_dir, 'views')).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
-        with open(os.path.join(LOOKML_OUTPUT_DIR, 'views', view.filename), 'w') as f:
+        with open(os.path.join(args.output_dir, 'views', view.filename), 'w') as f:
             f.write(view.contents)
 
-    logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(LOOKML_OUTPUT_DIR, "views")}')
+    logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(args.output_dir, "views")}')
 
     # Generate Lookml models
     lookml_models = [
@@ -117,7 +123,7 @@ def run():
         for model in typed_dbt_models
     ]
     for model in lookml_models:
-        with open(os.path.join(LOOKML_OUTPUT_DIR, model.filename), 'w') as f:
+        with open(os.path.join(args.output_dir, model.filename), 'w') as f:
             f.write(model.contents)
-    logging.info(f'Generated {len(lookml_models)} lookml models in {LOOKML_OUTPUT_DIR}')
+    logging.info(f'Generated {len(lookml_models)} lookml models in {args.output_dir}')
     logging.info('Success')
