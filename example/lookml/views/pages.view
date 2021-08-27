@@ -39,7 +39,7 @@ view: pages {
     description: "The page path. Everything after https://gethubble.io."
   }
 
-  dimension: Unique page view id {
+  dimension: unique_page_view_id {
     type: string
     sql: ${TABLE}.id ;;
     description: "The primary key for this table"
@@ -51,18 +51,25 @@ view: pages {
     description: "Website domain of the referrer. e.g. google.com"
   }
 
-  measure: Total page views {
+  dimension: user_id {
+    type: string
+    sql: ${TABLE}.user_id ;;
+    description: "persistent id of the user viewing the page"
+  }
+
+  measure: total_page_views {
     type: count
     sql: ${TABLE}.id ;;
     description: "Count of The primary key for this table"
   }
 
-  measure: Blog views {
+  measure: blog_views {
     type: count
     sql: ${TABLE}.id ;;
     description: "Count of The primary key for this table"
     filters: [
       path: "/blog%",
     ]
+    value_format_name: decimal_0
   }
 }
