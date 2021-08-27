@@ -52,11 +52,17 @@ dbt2looker
 
 Requires [poetry](https://python-poetry.org/docs/) and python >=3.7
 
+For development, it is recommended to use python 3.7:
+
 ```
-# Install
+# Ensure you're using 3.7
+poetry env use 3.7  
+# alternative: poetry env use /usr/local/opt/python@3.7/bin/python3
+
+# Install dependencies and main package
 poetry install
 
-# Run
+# Run dbtlooker in poetry environment
 poetry run dbt2looker
 ```
 
