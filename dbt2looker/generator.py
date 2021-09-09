@@ -9,6 +9,7 @@ LOOKER_DTYPE_MAP = {
         'INT64':     'number',
         'INTEGER':   'number',
         'FLOAT':     'number',
+        'FLOAT64':   'number',
         'NUMERIC':   'number',
         'BOOLEAN':   'yesno',
         'STRING':    'string',
