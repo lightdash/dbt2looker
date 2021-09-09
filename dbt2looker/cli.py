@@ -23,46 +23,40 @@ DEFAULT_LOOKML_OUTPUT_DIR = './lookml'
 
 
 def get_manifest(prefix: str):
-    paths = list(pathlib.Path(prefix).rglob('manifest.json'))
-    if len(paths) == 0:
-        logging.error(f'No manifest.json file found in path {prefix}')
+    manifest_path = os.path.join(prefix, 'manifest.json')
+    try:
+        with open(manifest_path, 'r') as f:
+            raw_manifest = json.load(f)
+    except FileNotFoundError as e:
+        logging.error(f'Could not find manifest file at {manifest_path}. Use --target-dir to change the search path for the manifest.json file.')
         raise SystemExit('Failed')
-    elif len(paths) > 1:
-        logging.warning(f'Multiple manifest.json files found in path {prefix} this can lead to unexpected behaviour')
-    path = paths[0]
-    with open(path, 'r') as f:
-        raw_manifest = json.load(f)
     parser.validate_manifest(raw_manifest)
-    logging.debug(f'Detected valid manifest at {path}')
+    logging.debug(f'Detected valid manifest at {manifest_path}')
     return raw_manifest
 
 
 def get_catalog(prefix: str):
-    paths = list(pathlib.Path(prefix).rglob('catalog.json'))
-    if len(paths) == 0:
-        logging.error(f'No catalog.json file found in path {prefix}')
+    catalog_path = os.path.join(prefix, 'catalog.json')
+    try:
+        with open(catalog_path, 'r') as f:
+            raw_catalog = json.load(f)
+    except FileNotFoundError as e:
+        logging.error(f'Could not find catalog file at {catalog_path}. Use --target-dir to change the search path for the catalog.json file.')
         raise SystemExit('Failed')
-    elif len(paths) > 1:
-        logging.warning(f'Multiple catalog.json files found in path {prefix} this can lead to unexpected behaviour')
-    path = paths[0]
-    with open(path, 'r') as f:
-        raw_catalog = json.load(f)
     parser.validate_catalog(raw_catalog)
-    logging.debug(f'Detected valid catalog at {path}')
+    logging.debug(f'Detected valid catalog at {catalog_path}')
     return raw_catalog
 
 
 def get_dbt_project_config(prefix: str):
-    paths = list(pathlib.Path(prefix).rglob('dbt_project.yml'))
-    if len(paths) == 0:
-        logging.error(f'No dbt_project.yml file found in path {prefix}')
+    project_path  = os.path.join(prefix, 'dbt_project.yml')
+    try:
+        with open(project_path, 'r') as f:
+            project_config = yaml.load(f, Loader=Loader)
+    except FileNotFoundError as e:
+        logging.error(f'Could a dbt_project.yml file at {project_path}. Use --project-dir to change the search path for the dbt_project.yml file.')
         raise SystemExit('Failed')
-    elif len(paths) > 1:
-        logging.warning(f'Multiple dbt_project.yml files found in path {prefix} this can lead to unexpected behaviour')
-    path = paths[0]
-    with open(path, 'r') as f:
-        project_config = yaml.load(f, Loader=Loader)
-    logging.debug(f'Detected valid dbt config at {path}')
+    logging.debug(f'Detected valid dbt config at {project_path}')
     return project_config
 
 
@@ -74,9 +68,15 @@ def run():
         version=f'dbt2looker {version("dbt2looker")}',
     )
     argparser.add_argument(
-        '--target',
-        help='Path to dbt target directory containing manifest.json and catalog.json.',
+        '--project-dir',
+        help='Path to dbt project directory containing dbt_project.yml. Default is "."',
         default='./',
+        type=str,
+    )
+    argparser.add_argument(
+        '--target-dir',
+        help='Path to dbt target directory containing manifest.json and catalog.json. Default is "./target"',
+        default='./target',
         type=str,
     )
     argparser.add_argument(
@@ -105,9 +105,9 @@ def run():
     )
 
     # Load raw manifest file
-    raw_manifest = get_manifest(args.target)
-    raw_catalog = get_catalog(args.target)
-    raw_config = get_dbt_project_config(args.target)
+    raw_manifest = get_manifest(prefix=args.target_dir)
+    raw_catalog = get_catalog(prefix=args.target_dir)
+    raw_config = get_dbt_project_config(prefix=args.project_dir)
 
     # Get dbt models from manifest
     dbt_project_config = parser.parse_dbt_project_config(raw_config)
