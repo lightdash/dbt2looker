@@ -3,6 +3,10 @@ import json
 import logging
 import pathlib
 import os
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version
 
 import yaml
 try:
@@ -64,6 +68,11 @@ def get_dbt_project_config(prefix: str):
 
 def run():
     argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '--version',
+        action='version',
+        version=f'dbt2looker {version("dbt2looker")}',
+    )
     argparser.add_argument(
         '--target',
         help='Path to dbt target directory containing manifest.json and catalog.json.',
