@@ -3,6 +3,7 @@ import json
 import jsonschema
 import importlib.resources
 from typing import Dict, Optional, List
+from functools import reduce
 
 from . import models
 
@@ -73,6 +74,13 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     adapter_type = parse_adapter_type(raw_manifest)
 
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))
+    for model in dbt_models:
+        logging.debug(
+            'Model %s has %d columns with %d measures',
+            model.name,
+            len(model.columns),
+            reduce(lambda acc, col: acc + len(col.meta.measures), model.columns.values(), 0)
+        )
 
     # Check catalog for models
     for model in dbt_models:

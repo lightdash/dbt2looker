@@ -283,6 +283,12 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
             'measures': lookml_measures_from_model(model),
         }
     }
+    logging.debug(
+        f'Created view from model %s with %d measures, %d dimensions',
+        model.name,
+        len(lookml['view']['measures']),
+        len(lookml['view']['dimensions']),
+    )
     contents = lkml.dump(lookml)
     filename = f'{model.name}.view'
     return models.LookViewFile(filename=filename, contents=contents)
