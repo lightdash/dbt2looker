@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.8.2
+### Changed
+- Measures with missing descriptions fall back to coloumn descriptions. If there is no column description it falls back to "{measure_type} of {column_name}".
+
 ## 0.8.1
 ### Added
 - Dimensions have an `enabled` flag that can be used to switch off generated dimensions for certain columns with `enabled: false`

@@ -269,7 +269,7 @@ def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: mo
         'name': measure_name,
         'type': measure.type.value,
         'sql': measure.sql or f'${{TABLE}}.{column.name}',
-        'description': measure.description or f'{measure.type.value.capitalize()} of {column.description}',
+        'description': measure.description or column.description or f'{measure.type.value.capitalize()} of {column.name}',
     }
     if measure.filters:
         m['filters'] = lookml_measure_filters(measure, model)
