@@ -306,10 +306,12 @@
       "properties": {
         "dimension": {
           "$ref": "#/definitions/LightdashDimension"
-        },
-        "measures": {
+        }
+      },
+      "patternProperties": {
+        "^measures?|metrics?$": {
           "type": "object",
-          "description": "Object containing measure definitions. Keys must be valid measure names and unique in this model.",
+          "description": "Object containing measures definitions. Keys ust be valid measure names and unique in this model.",
           "patternProperties": {
             "^[a-z][a-z0-9_]*$": {
               "$ref": "#/definitions/LightdashMeasure"

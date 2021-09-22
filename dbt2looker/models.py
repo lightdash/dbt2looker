@@ -97,6 +97,9 @@ class Dbt2LookerDimension(BaseModel):
 
 class Dbt2LookerMeta(BaseModel):
     measures: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    measure: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metrics: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metric: Optional[Dict[str, Dbt2LookerMeasure]] = {}
     dimension: Optional[Dbt2LookerDimension] = Dbt2LookerDimension()
 
 

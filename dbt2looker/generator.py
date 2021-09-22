@@ -258,7 +258,9 @@ def lookml_measures_from_model(model: models.DbtModel):
     return [
         lookml_measure(measure_name, column, measure, model)
         for column in model.columns.values()
-        for measure_name, measure in column.meta.measures.items()
+        for measure_name, measure in {
+            **column.meta.measures, **column.meta.measure, **column.meta.metrics, **column.meta.metric
+        }.items()
     ]
 
 

@@ -79,7 +79,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
             'Model %s has %d columns with %d measures',
             model.name,
             len(model.columns),
-            reduce(lambda acc, col: acc + len(col.meta.measures), model.columns.values(), 0)
+            reduce(lambda acc, col: acc + len(col.meta.measures) + len(col.meta.measure) + len(col.meta.metrics) + len(col.meta.metric), model.columns.values(), 0)
         )
 
     # Check catalog for models
