@@ -2,6 +2,14 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.8.1
+### Added
+- Dimensions have an `enabled` flag that can be used to switch off generated dimensions for certain columns with `enabled: false`
+- Measures have been aliased with the following: `measures,measure,metrics,metric`
+
+### Changed
+- Updated dependencies
+
 ## 0.8.0
 ### Changed
 - Command line interface changed argument from `--target` to `--target-dir`
