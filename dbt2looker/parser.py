@@ -46,9 +46,9 @@ def parse_adapter_type(raw_manifest: dict):
     return manifest.metadata.adapter_type
 
 
-def parse_models(raw_manifest: dict, tag=None):
+def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     manifest = models.DbtManifest(**raw_manifest)
-    all_models = [
+    all_models: List[models.DbtModel] = [
         node
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
