@@ -210,7 +210,8 @@ def lookml_dimension_groups_from_model(model: models.DbtModel, adapter_type: mod
     dates = [
         lookml_date_dimension_group(column, adapter_type)
         for column in model.columns.values()
-        if map_adapter_type_to_looker(adapter_type, column.data_type) in looker_date_types
+        if column.meta.dimension.enabled
+        and map_adapter_type_to_looker(adapter_type, column.data_type) in looker_date_types
     ]
     return date_times + dates
 
@@ -230,7 +231,8 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
             )
         }
         for column in model.columns.values()
-        if map_adapter_type_to_looker(adapter_type, column.data_type) in looker_scalar_types
+        if column.meta.dimension.enabled
+        and map_adapter_type_to_looker(adapter_type, column.data_type) in looker_scalar_types
     ]
 
 

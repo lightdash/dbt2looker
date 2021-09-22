@@ -210,6 +210,11 @@
       "type": "object",
       "required": [],
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "When enabled a dimension will be created in lookml for this column, otherwise it will be ignored. Default is enabled=true.",
+          "default": true
+        },
         "name": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$",

@@ -88,6 +88,7 @@ class Dbt2LookerMeasure(BaseModel):
 
 
 class Dbt2LookerDimension(BaseModel):
+    enabled: Optional[bool] = True
     name: Optional[str]
     sql: Optional[str]
     description: Optional[str]
