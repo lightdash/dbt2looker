@@ -158,7 +158,7 @@ LOOKER_DTYPE_MAP = {
     'spark': {
         'byte':        'number',
         'short':       'number',
-        'int':         'number',
+        'integer':     'number',
         'long':        'number',
         'float':       'number',
         'double':      'number',
