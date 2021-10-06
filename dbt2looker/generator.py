@@ -154,6 +154,22 @@ LOOKER_DTYPE_MAP = {
         'TIME WITHOUT TIME ZONE': 'string',
         # TIMETZ not supported
         # TIME WITH TIME ZONE not supported
+    },
+    'spark': {
+        'ByteType':      'number',
+        'ShortType':     'number',
+        'IntegerType':   'number',
+        'LongType':      'number',
+        'FloatType':     'number',
+        'DoubleType':    'number',
+        'DecimalType':   'number',
+        'StringType':    'string',
+        'string':        'string',
+        'VarcharType':   'string',
+        'CharType':      'string',
+        'BooleanType':   'yesno',
+        'TimestampType': 'timestamp',
+        'DateType':      'datetime',
     }
 }
 
