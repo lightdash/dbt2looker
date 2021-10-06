@@ -156,20 +156,19 @@ LOOKER_DTYPE_MAP = {
         # TIME WITH TIME ZONE not supported
     },
     'spark': {
-        'ByteType':      'number',
-        'ShortType':     'number',
-        'IntegerType':   'number',
-        'LongType':      'number',
-        'FloatType':     'number',
-        'DoubleType':    'number',
-        'DecimalType':   'number',
-        'StringType':    'string',
-        'string':        'string',
-        'VarcharType':   'string',
-        'CharType':      'string',
-        'BooleanType':   'yesno',
-        'TimestampType': 'timestamp',
-        'DateType':      'datetime',
+        'byte':        'number',
+        'short':       'number',
+        'int':         'number',
+        'long':        'number',
+        'float':       'number',
+        'double':      'number',
+        'decimal':     'number',
+        'string':      'string',
+        'varchar':     'string',
+        'char':        'string',
+        'boolean':     'yesno',
+        'timestamp':   'timestamp',
+        'date':        'datetime',
     }
 }
 
