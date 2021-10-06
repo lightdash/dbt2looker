@@ -297,7 +297,7 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     lookml = {
         'view': {
             'name': model.name,
-            'sql_table_name': f'{model.database}.{model.db_schema}.{model.name}',
+            'sql_table_name': "{}".format("" if model.database is None else model.database + ".") + f'{model.db_schema}.{model.name}',
             'dimension_groups': lookml_dimension_groups_from_model(model, adapter_type),
             'dimensions': lookml_dimensions_from_model(model, adapter_type),
             'measures': lookml_measures_from_model(model),
