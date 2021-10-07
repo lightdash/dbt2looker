@@ -153,7 +153,7 @@ class DbtModelMeta(Dbt2LookerModelMeta):
 
 class DbtModel(DbtNode):
     resource_type: Literal['model']
-    database: Optional[str]
+    relation_name: str
     db_schema: str = Field(..., alias='schema')
     name: str
     description: str
@@ -188,7 +188,6 @@ class DbtManifest(BaseModel):
 
 class DbtCatalogNodeMetadata(BaseModel):
     type: str
-    database: Optional[str]
     db_schema: str = Field(..., alias='schema')
     name: str
     comment: Optional[str]
