@@ -4,7 +4,10 @@ Recent and upcoming changes to dbt2looker
 
 ## 0.9.1
 ### Fixed
-- Bug where dbt2looker would fail if a dbt model had no tags
+- Fixed bug where dbt2looker would crash if a dbt project contained an empty model
+
+### Changed
+- When filtering models by tag, models that have no tag property will be ignored
 
 ## 0.9.0
 ### Added

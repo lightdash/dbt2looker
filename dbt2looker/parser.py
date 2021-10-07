@@ -52,9 +52,8 @@ def tags_match(query_tag: str, model: models.DbtModel) -> bool:
     except AttributeError:
         return False
     except ValueError:
+        # Is the tag just a string?
         return query_tag == model.tags
-    else:
-        return False
 
 
 def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
