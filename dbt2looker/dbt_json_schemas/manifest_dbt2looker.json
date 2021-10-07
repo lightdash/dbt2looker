@@ -1057,7 +1057,7 @@
         },
         "meta": {
           "type": "object",
-          "$ref": "#/definitions/LightdashModelMetadata",
+          "$ref": "#/definitions/LightdashModelMetadata"
         },
         "docs": {
           "$ref": "#/definitions/Docs",
