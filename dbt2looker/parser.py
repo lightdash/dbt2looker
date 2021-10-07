@@ -2,7 +2,7 @@ import logging
 import json
 import jsonschema
 import importlib.resources
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 from functools import reduce
 
 from . import models
@@ -46,6 +46,19 @@ def parse_adapter_type(raw_manifest: dict):
     return manifest.metadata.adapter_type
 
 
+def tags_match(query_tag: Union[str, None], model: models.DbtModel) -> bool:
+    if query_tag is None:
+        return True
+    try:
+        return query_tag in model.tags
+    except AttributeError:
+        return False
+    except ValueError:
+        return query_tag == model.tags
+    else:
+        return False
+
+
 def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     manifest = models.DbtManifest(**raw_manifest)
     all_models: List[models.DbtModel] = [
@@ -53,12 +66,7 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
     ]
-    filtered_models = (
-        all_models if tag is None else [
-            model for model in all_models
-            if tag in model.tags
-        ]
-    )
+    filtered_models = (model for model in all_models if tags_match(tag, model))
     return filtered_models
 
 

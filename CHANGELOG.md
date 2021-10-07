@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.9.1
+### Fixed
+- Bug where dbt2looker would fail if a dbt model had no tags
+
 ## 0.9.0
 ### Added
 - Support for spark adapter (@chaimt)
