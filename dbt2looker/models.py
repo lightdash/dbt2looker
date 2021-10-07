@@ -18,7 +18,6 @@ class SupportedDbtAdapters(str, Enum):
     postgres = 'postgres'
     redshift = 'redshift'
     snowflake = 'snowflake'
-    spark = 'spark'
 
 
 # Lookml types
