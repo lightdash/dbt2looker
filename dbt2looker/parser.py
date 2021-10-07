@@ -83,6 +83,9 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
 
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))
     for model in dbt_models:
+        if not hasattr(model, 'name'):
+            logging.error('Cannot pass model %s', model)
+            logging.error('Model: %s', json.dumps(model, indent=4))
         logging.debug(
             'Model %s has %d columns with %d measures',
             model.name,
