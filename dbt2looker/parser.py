@@ -66,7 +66,7 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
     ]
-    filtered_models = (model for model in all_models if tags_match(tag, model))
+    filtered_models = [model for model in all_models if tags_match(tag, model)]
     return filtered_models
 
 
