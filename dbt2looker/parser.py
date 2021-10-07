@@ -46,9 +46,7 @@ def parse_adapter_type(raw_manifest: dict):
     return manifest.metadata.adapter_type
 
 
-def tags_match(query_tag: Union[str, None], model: models.DbtModel) -> bool:
-    if query_tag is None:
-        return True
+def tags_match(query_tag: str, model: models.DbtModel) -> bool:
     try:
         return query_tag in model.tags
     except AttributeError:
@@ -66,8 +64,16 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
     ]
-    filtered_models = [model for model in all_models if tags_match(tag, model)]
-    return filtered_models
+
+    # Empty model files have many missing parameters
+    for model in all_models:
+        if not hasattr(model, 'name'):
+            logging.error('Cannot parse model with id: "%s" - is the model file empty?', model.unique_id)
+            raise SystemExit('Failed')
+
+    if tag is None:
+        return all_models
+    return [model for model in all_models if tags_match(tag, model)]
 
 
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):
@@ -83,9 +89,6 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
 
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))
     for model in dbt_models:
-        if not hasattr(model, 'name'):
-            logging.error('Cannot pass model %s', model)
-            logging.error('Model: %s', json.dumps(model, indent=4))
         logging.debug(
             'Model %s has %d columns with %d measures',
             model.name,
