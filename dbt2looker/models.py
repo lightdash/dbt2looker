@@ -18,6 +18,7 @@ class SupportedDbtAdapters(str, Enum):
     postgres = 'postgres'
     redshift = 'redshift'
     snowflake = 'snowflake'
+    spark = 'spark'
 
 
 # Lookml types
@@ -152,7 +153,7 @@ class DbtModelMeta(Dbt2LookerModelMeta):
 
 class DbtModel(DbtNode):
     resource_type: Literal['model']
-    database: str
+    relation_name: str
     db_schema: str = Field(..., alias='schema')
     name: str
     description: str
@@ -187,7 +188,6 @@ class DbtManifest(BaseModel):
 
 class DbtCatalogNodeMetadata(BaseModel):
     type: str
-    database: str
     db_schema: str = Field(..., alias='schema')
     name: str
     comment: Optional[str]

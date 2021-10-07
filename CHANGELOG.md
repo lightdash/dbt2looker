@@ -3,8 +3,12 @@
 Recent and upcoming changes to dbt2looker
 
 ## 0.8.3
+### Added
+- Support for spark adapter (@chaimt)
+
 ### Changed
 - Updated with support for dbt2looker (@chaimt)
+- Lookml views now populate their "sql_table_name" using the dbt relation name
 
 ## 0.8.2
 ### Changed

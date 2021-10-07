@@ -87,7 +87,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
         if model.unique_id not in catalog_nodes:
             logging.warning(
                 f'Model {model.unique_id} not found in catalog. No looker view will be generated. '
-                f'Check if model has materialized in {adapter_type} at {model.database}.{model.db_schema}.{model.name}')
+                f'Check if model has materialized in {adapter_type} at {model.relation_name}')
 
     # Update dbt models with data types from catalog
     dbt_typed_models = [
