@@ -2,7 +2,7 @@
 
 Recent and upcoming changes to dbt2looker
 
-## 0.8.3
+## 0.9.0
 ### Added
 - Support for spark adapter (@chaimt)
 
