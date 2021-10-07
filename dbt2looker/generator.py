@@ -1,4 +1,5 @@
 import logging
+import re
 
 import lkml
 
@@ -187,14 +188,13 @@ looker_timeframes = [
 ]
 
 
+def normalise_spark_types(column_type: str) -> str:
+    return re.match(r'^[^\(]*', column_type)
+
+
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
-    looker_type = LOOKER_DTYPE_MAP[adapter_type].get(column_type)
-    if (column_type is not None) and (looker_type is None):
-        bracket_index = column_type.index("(")
-        if bracket_index != -1:      
-            fixed_column_type = column_type[0:bracket_index]      
-            logging.debug(f'typing to fix column_type {column_type} to {fixed_column_type}')
-            looker_type = LOOKER_DTYPE_MAP[adapter_type].get(fixed_column_type)
+    normalised_column_type = normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type
+    looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
     if (column_type is not None) and (looker_type is None):
         logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
     return looker_type
