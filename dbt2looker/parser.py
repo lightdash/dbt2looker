@@ -2,7 +2,7 @@ import logging
 import json
 import jsonschema
 import importlib.resources
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 from functools import reduce
 
 from . import models
@@ -46,6 +46,16 @@ def parse_adapter_type(raw_manifest: dict):
     return manifest.metadata.adapter_type
 
 
+def tags_match(query_tag: str, model: models.DbtModel) -> bool:
+    try:
+        return query_tag in model.tags
+    except AttributeError:
+        return False
+    except ValueError:
+        # Is the tag just a string?
+        return query_tag == model.tags
+
+
 def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     manifest = models.DbtManifest(**raw_manifest)
     all_models: List[models.DbtModel] = [
@@ -53,13 +63,16 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
     ]
-    filtered_models = (
-        all_models if tag is None else [
-            model for model in all_models
-            if tag in model.tags
-        ]
-    )
-    return filtered_models
+
+    # Empty model files have many missing parameters
+    for model in all_models:
+        if not hasattr(model, 'name'):
+            logging.error('Cannot parse model with id: "%s" - is the model file empty?', model.unique_id)
+            raise SystemExit('Failed')
+
+    if tag is None:
+        return all_models
+    return [model for model in all_models if tags_match(tag, model)]
 
 
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):

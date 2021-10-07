@@ -2,6 +2,13 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.9.1
+### Fixed
+- Fixed bug where dbt2looker would crash if a dbt project contained an empty model
+
+### Changed
+- When filtering models by tag, models that have no tag property will be ignored
+
 ## 0.9.0
 ### Added
 - Support for spark adapter (@chaimt)
