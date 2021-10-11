@@ -189,7 +189,7 @@ looker_timeframes = [
 
 
 def normalise_spark_types(column_type: str) -> str:
-    return re.match(r'^[^\(]*', column_type)
+    return re.match(r'^[^\(]*', column_type).group(0)
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
