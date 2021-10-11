@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.9.2
+### Fixed
+- Bug in spark adapter
+
 ## 0.9.1
 ### Fixed
 - Fixed bug where dbt2looker would crash if a dbt project contained an empty model
