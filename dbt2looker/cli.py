@@ -20,6 +20,8 @@ from . import generator
 
 MANIFEST_PATH = './manifest.json'
 DEFAULT_LOOKML_OUTPUT_DIR = './lookml'
+DEFAULT_MODEL_CONNECTION = ''
+DEFAULT_MODEL_INCLUDE = '/views/*'
 
 
 def get_manifest(prefix: str):
@@ -95,6 +97,18 @@ def run():
         default=DEFAULT_LOOKML_OUTPUT_DIR,
         type=str,
     )
+    argparser.add_argument(
+        '--model-connection',
+        help='DB Connection Name for models',
+        default=DEFAULT_MODEL_CONNECTION,
+        type=str,
+    )
+    argparser.add_argument(
+        '--model-include',
+        help='DB Connection Name for models',
+        default=DEFAULT_MODEL_INCLUDE,
+        type=str,
+    )
     args = argparser.parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),
@@ -125,12 +139,16 @@ def run():
     logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(args.output_dir, "views")}')
 
     # Generate Lookml models
+    connection_name = args.model_connection
+    if connection_name=='':
+        connection_name = dbt_project_config.name
     lookml_models = [
-        generator.lookml_model_from_dbt_model(model, dbt_project_config.name)
+        generator.lookml_model_from_dbt_model(model, connection_name, args.model_include)
         for model in typed_dbt_models
     ]
     for model in lookml_models:
         with open(os.path.join(args.output_dir, model.filename), 'w') as f:
             f.write(model.contents)
+    
     logging.info(f'Generated {len(lookml_models)} lookml models in {args.output_dir}')
     logging.info('Success')
