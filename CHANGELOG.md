@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.9.3
+### Added
+- New run option ()
+
 ## 0.9.2
 ### Fixed
 - Bug in spark adapter
