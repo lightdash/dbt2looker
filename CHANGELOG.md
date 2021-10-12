@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.9.3
+### Fixed
+- Fix name of models and view to add lkml suffix
+
 ## 0.9.2
 ### Fixed
 - Bug in spark adapter
