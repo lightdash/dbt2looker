@@ -296,6 +296,8 @@ def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: mo
         m['filters'] = lookml_measure_filters(measure, model)
     if measure.value_format_name:
         m['value_format_name'] = measure.value_format_name.value
+    if measure.group_label:
+        m['group_label'] = measure.group_label
     return m
 
 
