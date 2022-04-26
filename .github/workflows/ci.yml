@@ -22,9 +22,11 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          poetry-version: ${{ matrix.poetry-version }}      
+      - name: Poetry Version
+        run: poetry version prepatch
       - name: Poetry Build
-        run: poetry build        
+        run: poetry build
       - name: Build and publish to pypi
         if: ${{ !github.event.issue.pull_request }}
         uses: JRubics/poetry-publish@v1.10
