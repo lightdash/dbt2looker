@@ -31,6 +31,16 @@ jobs:
         run: poetry version patch
       - name: Poetry Build
         run: poetry build
+
+  deploy:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.11]
+        os: [ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: Build and publish to pypi
         if: ${{ !github.event.issue.pull_request }}
         uses: JRubics/poetry-publish@v1.10
