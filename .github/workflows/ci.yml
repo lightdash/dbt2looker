@@ -41,5 +41,6 @@ jobs:
           repository_url: "https://yotpo.jfrog.io/artifactory/api/pypi/pypi-local"
       - name: Push Version to git
         uses: stefanzweifel/git-auto-commit-action@v4
-        commit_message: "Automated Change: Version Updated"
-        file_pattern: pyproject.toml
+        with:
+          commit_message: "Automated Change: Version Updated"
+          file_pattern: pyproject.toml
