@@ -1,0 +1,46 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.11]
+        os: [ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}      
+      - name: Poetry Version Pull Request
+        if: ${{ !github.event.issue.pull_request }}
+        run: poetry version prepatch
+      - name: Poetry Version Master
+        if: ${{ github.event.issue.pull_request }}
+        run: poetry version patch
+      - name: Poetry Build
+        run: poetry build
+      - name: Build and publish to pypi
+        if: ${{ !github.event.issue.pull_request }}
+        uses: JRubics/poetry-publish@v1.10
+        with:
+          repository_username: ${{ secrets.JFROG_USER }}
+          repository_password: ${{ secrets.JFROG_PASSWORD }}
+          repository_name: "dbt2looker"
+          repository_url: "https://yotpo.jfrog.io/artifactory/api/pypi/pypi-local"
+      - name: Push Version to git
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automated Change: Version Updated"
+          file_pattern: pyproject.toml
