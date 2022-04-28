@@ -229,168 +229,6 @@
   "additionalProperties": false,
   "description": "WritableManifest(metadata: dbt.contracts.graph.manifest.ManifestMetadata, nodes: Mapping[str, Union[dbt.contracts.graph.compiled.CompiledAnalysisNode, dbt.contracts.graph.compiled.CompiledSingularTestNode, dbt.contracts.graph.compiled.CompiledModelNode, dbt.contracts.graph.compiled.CompiledHookNode, dbt.contracts.graph.compiled.CompiledRPCNode, dbt.contracts.graph.compiled.CompiledSqlNode, dbt.contracts.graph.compiled.CompiledGenericTestNode, dbt.contracts.graph.compiled.CompiledSeedNode, dbt.contracts.graph.compiled.CompiledSnapshotNode, dbt.contracts.graph.parsed.ParsedAnalysisNode, dbt.contracts.graph.parsed.ParsedSingularTestNode, dbt.contracts.graph.parsed.ParsedHookNode, dbt.contracts.graph.parsed.ParsedModelNode, dbt.contracts.graph.parsed.ParsedRPCNode, dbt.contracts.graph.parsed.ParsedSqlNode, dbt.contracts.graph.parsed.ParsedGenericTestNode, dbt.contracts.graph.parsed.ParsedSeedNode, dbt.contracts.graph.parsed.ParsedSnapshotNode]], sources: Mapping[str, dbt.contracts.graph.parsed.ParsedSourceDefinition], macros: Mapping[str, dbt.contracts.graph.parsed.ParsedMacro], docs: Mapping[str, dbt.contracts.graph.parsed.ParsedDocumentation], exposures: Mapping[str, dbt.contracts.graph.parsed.ParsedExposure], metrics: Mapping[str, dbt.contracts.graph.parsed.ParsedMetric], selectors: Mapping[str, Any], disabled: Union[Mapping[str, List[Union[dbt.contracts.graph.compiled.CompiledAnalysisNode, dbt.contracts.graph.compiled.CompiledSingularTestNode, dbt.contracts.graph.compiled.CompiledModelNode, dbt.contracts.graph.compiled.CompiledHookNode, dbt.contracts.graph.compiled.CompiledRPCNode, dbt.contracts.graph.compiled.CompiledSqlNode, dbt.contracts.graph.compiled.CompiledGenericTestNode, dbt.contracts.graph.compiled.CompiledSeedNode, dbt.contracts.graph.compiled.CompiledSnapshotNode, dbt.contracts.graph.parsed.ParsedAnalysisNode, dbt.contracts.graph.parsed.ParsedSingularTestNode, dbt.contracts.graph.parsed.ParsedHookNode, dbt.contracts.graph.parsed.ParsedModelNode, dbt.contracts.graph.parsed.ParsedRPCNode, dbt.contracts.graph.parsed.ParsedSqlNode, dbt.contracts.graph.parsed.ParsedGenericTestNode, dbt.contracts.graph.parsed.ParsedSeedNode, dbt.contracts.graph.parsed.ParsedSnapshotNode, dbt.contracts.graph.parsed.ParsedSourceDefinition]]], NoneType], parent_map: Union[Dict[str, List[str]], NoneType], child_map: Union[Dict[str, List[str]], NoneType])",
   "definitions": {
-    "LightdashDimension": {
-      "type": "object",
-      "required": [],
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "When enabled a dimension will be created in lookml for this column, otherwise it will be ignored. Default is enabled=true.",
-          "default": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$",
-          "description": "An optional name for the dimension, defaults to DBT column name"
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional description for the column, defaults to the DBT column description"
-        },
-        "sql": {
-          "type": "string",
-          "description": "Optional sql string defining the dimension. Defaults to ${TABLE}.column_name"
-        },
-        "value_format_name": {
-          "description": "Optional format for numerical dimensions",
-          "type": "string",
-          "enum": [
-            "decimal_0", "decimal_1", "decimal_2", "decimal_3", "decimal_4",
-            "usd_0", "usd",
-            "gbp_0", "gbp",
-            "eur_0", "eur",
-            "id",
-            "percent_0", "percent_1", "percent_2", "percent_3", "percent_4"
-          ]
-        }
-      }
-    },
-    "LightdashMeasure": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "description": "The type of the measure e.g. average, max min. Not all looker measure types are supported.",
-          "type": "string",
-          "enum": [
-            "average",
-            "average_distinct",
-            "count",
-            "count_distinct",
-            "list",
-            "max",
-            "median",
-            "median_distinct",
-            "min",
-            "sum",
-            "sum_distinct"
-          ]
-        },
-        "description": {
-          "description": "Optional description for the measure. Default's to a variant of the column description depending on the measure type.",
-          "type": "string"
-        },
-        "sql": {
-          "description": "Optional sql string defining the measure value. Defaults ${TABLE}.column_name",
-          "type": "string"
-        },
-        "value_format_name": {
-          "description": "Optional format for measure",
-          "type": "string",
-          "enum": [
-            "decimal_0", "decimal_1", "decimal_2", "decimal_3", "decimal_4",
-            "usd_0", "usd",
-            "gbp_0", "gbp",
-            "eur_0", "eur",
-            "id",
-            "percent_0", "percent_1", "percent_2", "percent_3", "percent_4"
-          ]
-        },
-        "filters": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "description": "Object of filters. The keys must be a valid dimension name.",
-            "type": "object",
-            "required": [],
-            "patternProperties": {
-              "^[a-z][a-z0-9_]*$": {
-                "type": "string",
-                "description": "Lookml filter expression"
-              }
-            }
-          }
-        }
-      }
-    },
-    "LightdashColumnMetadata": {
-      "type": "object",
-      "required": [],
-      "properties": {
-        "dimension": {
-          "$ref": "#/definitions/LightdashDimension"
-        }
-      },
-      "patternProperties": {
-        "^measures?|metrics?$": {
-          "type": "object",
-          "description": "Object containing measures definitions. Keys ust be valid measure names and unique in this model.",
-          "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
-              "$ref": "#/definitions/LightdashMeasure"
-            }
-          },
-          "default": {}
-        }
-      }
-    },
-    "LightdashModelMetadata": {
-      "type": "object",
-      "required": [],
-      "properties": {
-        "joins": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "join",
-              "sql_on"
-            ],
-            "properties": {
-              "join": {
-                "description": "Name of the dbt model you'd like to join to",
-                "type": "string"
-              },
-              "sql_on": {
-                "description": "Sql string defining the join. Use looker references ${table.dimension}=${table.dimesion}",
-                "type": "string"
-              },
-              "type": {
-                "type": "string",
-                "default": "left_outer",
-                "enum": [
-                  "left_outer",
-                  "full_outer",
-                  "inner",
-                  "cross"
-                ]
-              },
-              "relationship": {
-                "type": "string",
-                "default": "many_to_one",
-                "enum": [
-                  "many_to_one",
-                  "many_to_many",
-                  "one_to_many",
-                  "one_to_one"
-                ]
-              }
-            }
-          }
-        }
-      },
-      "default": {}
-    },
     "ManifestMetadata": {
       "type": "object",
       "required": [],
@@ -894,7 +732,6 @@
           "default": ""
         },
         "meta": {
-          "$ref": "#/definitions/LightdashColumnMetadata",
           "type": "object",
           "default": {}
         },
@@ -6098,5 +5935,5 @@
     }
   },
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://schemas.lightdash.com/dbt2looker/manifest/v4.json"
+  "$id": "https://schemas.getdbt.com/dbt/manifest/v4.json"
 }
