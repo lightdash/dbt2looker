@@ -1,8 +1,5 @@
 name: CI
 on:
-  push:
-    branches:
-      - main
   pull_request: {}
 
 jobs:
@@ -24,23 +21,6 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}      
       - name: Poetry Version Pull Request
-        if: ${{ !github.event.issue.pull_request }}
         run: poetry version prepatch
-      - name: Poetry Version Master
-        if: ${{ github.event.issue.pull_request }}
-        run: poetry version patch
       - name: Poetry Build
         run: poetry build
-      - name: Build and publish to pypi
-        if: ${{ !github.event.issue.pull_request }}
-        uses: JRubics/poetry-publish@v1.10
-        with:
-          repository_username: ${{ secrets.JFROG_USER }}
-          repository_password: ${{ secrets.JFROG_PASSWORD }}
-          repository_name: "dbt2looker"
-          repository_url: "https://yotpo.jfrog.io/artifactory/api/pypi/pypi-local"
-      - name: Push Version to git
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Automated Change: Version Updated"
-          file_pattern: pyproject.toml
