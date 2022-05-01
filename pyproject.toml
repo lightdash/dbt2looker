@@ -5,7 +5,7 @@ description = "Generate lookml view files from dbt models"
 authors = ["oliverlaslett <oliver@gethubble.io>", "chaimturkel <cyturel@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/hubble-data/dbt2looker"
+homepage = "https://github.com/YotpoLtd/yoda-dbt2looker"
 repository = "https://github.com/YotpoLtd/yoda-dbt2looker"
 
 [tool.poetry.dependencies]
@@ -24,4 +24,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-dbt2looker = 'dbt2looker.cli:run'
+yoda_dbt2looker = 'yoda_dbt2looker.cli:run'
