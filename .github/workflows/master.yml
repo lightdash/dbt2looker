@@ -31,7 +31,7 @@ jobs:
         with:
           repository_username: ${{ secrets.JFROG_USER }}
           repository_password: ${{ secrets.JFROG_PASSWORD }}
-          repository_name: "dbt2looker"
+          repository_name: "yoda-dbt2looker"
           repository_url: "https://yotpo.jfrog.io/artifactory/api/pypi/pypi-local"
       - name: Push Version to git
         uses: stefanzweifel/git-auto-commit-action@v4
