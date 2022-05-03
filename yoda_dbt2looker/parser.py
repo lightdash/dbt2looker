@@ -9,7 +9,7 @@ from . import models
 
 
 def validate_manifest(raw_manifest: dict):
-    with importlib.resources.open_text("dbt2looker.dbt_json_schemas", "manifest_dbt2looker.json") as f:
+    with importlib.resources.open_text("yoda_dbt2looker.dbt_json_schemas", "manifest_dbt2looker.json") as f:
         schema = json.load(f)
     v = jsonschema.Draft7Validator(schema)
     hasError = False
