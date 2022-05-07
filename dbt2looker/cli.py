@@ -22,7 +22,7 @@ MANIFEST_PATH = './manifest.json'
 DEFAULT_LOOKML_OUTPUT_DIR = './lookml'
 
 
-def get_manifest(prefix: str):
+def get_manifest(prefix: str, skip_manifest_validation: bool):
     manifest_path = os.path.join(prefix, 'manifest.json')
     try:
         with open(manifest_path, 'r') as f:
@@ -30,8 +30,13 @@ def get_manifest(prefix: str):
     except FileNotFoundError as e:
         logging.error(f'Could not find manifest file at {manifest_path}. Use --target-dir to change the search path for the manifest.json file.')
         raise SystemExit('Failed')
-    parser.validate_manifest(raw_manifest)
-    logging.debug(f'Detected valid manifest at {manifest_path}')
+
+    if skip_manifest_validation:
+        logging.debug(f'Detected manifest at {manifest_path}')
+    else:
+        parser.validate_manifest(raw_manifest)
+        logging.debug(f'Detected valid manifest at {manifest_path}')
+
     return raw_manifest
 
 
@@ -104,8 +109,15 @@ def run():
         datefmt='%H:%M:%S',
     )
 
+    argparser.add_argument(
+        '--skip-manifest-validation',
+        help='Skips dbt manifest schema validation',
+        default=False,
+        action='store_true'
+    )
+
     # Load raw manifest file
-    raw_manifest = get_manifest(prefix=args.target_dir)
+    raw_manifest = get_manifest(prefix=args.target_dir, skip_manifest_validation=args.skip_manifest_validation)
     raw_catalog = get_catalog(prefix=args.target_dir)
     raw_config = get_dbt_project_config(prefix=args.project_dir)
 
