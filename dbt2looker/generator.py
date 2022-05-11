@@ -298,6 +298,10 @@ def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: mo
         m['value_format_name'] = measure.value_format_name.value
     if measure.group_label:
         m['group_label'] = measure.group_label
+    if measure.label:
+        m['label'] = measure.label
+    if measure.hidden:
+        m['hidden'] = measure.hidden.value
     return m
 
 
