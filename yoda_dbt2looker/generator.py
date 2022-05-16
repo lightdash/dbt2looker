@@ -327,7 +327,7 @@ def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
     #       and models are unique across dbt packages in project
     lookml = {
         'connection': dbt_project_name,
-        'include': '/views/*',
+        'include': 'views/*',
         'explore': {
             'name': model.name,
             'description': model.description,
