@@ -115,6 +115,15 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     ]
     logging.debug('Found catalog entries for %d models', len(dbt_typed_models))
     logging.debug('Catalog entries missing for %d models', len(dbt_models) - len(dbt_typed_models))
+    if (len(dbt_models) - len(dbt_typed_models) >0):
+        for dbt_model in dbt_models:            
+            found = False
+            for dbt_typed_model in dbt_typed_models:
+                if dbt_model.unique_id == dbt_typed_model.unique_id:
+                    found = True
+            if not found:
+                logging.warn(f'Catalog missing for {dbt_model.unique_id} model')
+
     check_models_for_missing_column_types(dbt_typed_models)
     return dbt_typed_models
 
