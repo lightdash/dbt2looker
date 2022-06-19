@@ -75,6 +75,19 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     return [model for model in all_models if tags_match(tag, model)]
 
 
+def parse_exposures(raw_manifest: dict, tag=None) -> List[models.DbtExposure]:
+    manifest = models.DbtManifest(**raw_manifest)
+    # Empty model files have many missing parameters
+    all_exposures = manifest.exposures.values()
+    for exposure in all_exposures:
+        if not hasattr(exposure, 'name'):
+            logging.error('Cannot parse exposure with id: "%s" - is the exposure file empty?', model.unique_id)
+            raise SystemExit('Failed')
+
+    if tag is None:
+        return all_exposures
+    return [exposure for exposure in all_exposures if tags_match(tag, exposure)]
+
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):
     for model in dbt_typed_models:
         if all([col.data_type is None for col in model.columns.values()]):
@@ -118,8 +131,25 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     check_models_for_missing_column_types(dbt_typed_models)
     return dbt_typed_models
 
+def parse_typed_exposures(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
+    catalog_nodes = parse_catalog_nodes(raw_catalog)
+    dbt_exposures = parse_exposures(raw_manifest, tag=tag)
+    adapter_type = parse_adapter_type(raw_manifest)
+
+    logging.debug('Parsed %d exposures from manifest.json', len(dbt_exposures))
+    # Check manifest for models
+    for exposure in dbt_exposures:
+        if exposure.unique_id not in catalog_nodes:
+            logging.warning(
+                f'Exposure {exposure.unique_id} not found in catalog. No looker view will be generated. '
+                f'Check if exposure has materialized in {adapter_type}')
+
+    logging.debug('Found catalog entries for %d exposures', len(dbt_exposures))
+    return dbt_exposures
+
 
 def get_column_type_from_catalog(catalog_nodes: Dict[str, models.DbtCatalogNode], model_id: str, column_name: str):
     node = catalog_nodes.get(model_id)
     column = None if node is None else node.columns.get(column_name)
     return None if column is None else column.type
+

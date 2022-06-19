@@ -143,7 +143,12 @@ class Dbt2LookerExploreJoin(BaseModel):
     sql_on: str
 
 
+class Dbt2MetaLookerModelMeta(BaseModel):
+    joins: Optional[List[Dbt2LookerExploreJoin]] = []
+    explore_name: str
+    
 class Dbt2LookerModelMeta(BaseModel):
+    looker: Optional[Dbt2MetaLookerModelMeta] 
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
 
 
@@ -168,6 +173,12 @@ class DbtModel(DbtNode):
             for name, column in v.items()
         }
 
+class DbtExposure(DbtNode):
+    resource_type: Literal['exposure']
+    name: str
+    description: str
+    tags: List[str]
+    meta: DbtModelMeta
 
 class DbtManifestMetadata(BaseModel):
     adapter_type: str
@@ -183,6 +194,7 @@ class DbtManifestMetadata(BaseModel):
 
 class DbtManifest(BaseModel):
     nodes: Dict[str, Union[DbtModel, DbtNode]]
+    exposures: Dict[str, Union[DbtExposure, DbtNode]]
     metadata: DbtManifestMetadata
 
 
