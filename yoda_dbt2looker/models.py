@@ -173,11 +173,17 @@ class DbtModel(DbtNode):
             for name, column in v.items()
         }
 
+
+class DbtExposureDependsOn(BaseModel):
+    macros: List[str]
+    nodes: List[str]
+    
 class DbtExposure(DbtNode):
     resource_type: Literal['exposure']
     name: str
     description: str
     tags: List[str]
+    depends_on: DbtExposureDependsOn
     meta: DbtModelMeta
 
 class DbtManifestMetadata(BaseModel):

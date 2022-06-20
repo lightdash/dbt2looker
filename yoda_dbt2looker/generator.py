@@ -321,6 +321,9 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     filename = f'{model.name}.view.lkml'
     return models.LookViewFile(filename=filename, contents=contents)
 
+def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str):
+    pass
+
 def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)

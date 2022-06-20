@@ -81,7 +81,7 @@ def parse_exposures(raw_manifest: dict, tag=None) -> List[models.DbtExposure]:
     all_exposures = manifest.exposures.values()
     for exposure in all_exposures:
         if not hasattr(exposure, 'name'):
-            logging.error('Cannot parse exposure with id: "%s" - is the exposure file empty?', model.unique_id)
+            logging.error('Cannot parse exposure with id: "%s" - is the exposure file empty?', exposure.unique_id)
             raise SystemExit('Failed')
 
     if tag is None:
@@ -97,8 +97,11 @@ def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel
 def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
     catalog_nodes = parse_catalog_nodes(raw_catalog)
     dbt_models = parse_models(raw_manifest, tag=tag)
+    manifest = models.DbtManifest(**raw_manifest)
+    typed_dbt_exposures: List[models.DbtExposure] = parse_exposures(raw_manifest, tag=tag)
+    exposure_nodes = [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
     adapter_type = parse_adapter_type(raw_manifest)
-
+    dbt_models = dbt_models + exposure_nodes
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))
     for model in dbt_models:
         logging.debug(
@@ -130,22 +133,6 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     logging.debug('Catalog entries missing for %d models', len(dbt_models) - len(dbt_typed_models))
     check_models_for_missing_column_types(dbt_typed_models)
     return dbt_typed_models
-
-def parse_typed_exposures(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
-    catalog_nodes = parse_catalog_nodes(raw_catalog)
-    dbt_exposures = parse_exposures(raw_manifest, tag=tag)
-    adapter_type = parse_adapter_type(raw_manifest)
-
-    logging.debug('Parsed %d exposures from manifest.json', len(dbt_exposures))
-    # Check manifest for models
-    for exposure in dbt_exposures:
-        if exposure.unique_id not in catalog_nodes:
-            logging.warning(
-                f'Exposure {exposure.unique_id} not found in catalog. No looker view will be generated. '
-                f'Check if exposure has materialized in {adapter_type}')
-
-    logging.debug('Found catalog entries for %d exposures', len(dbt_exposures))
-    return dbt_exposures
 
 
 def get_column_type_from_catalog(catalog_nodes: Dict[str, models.DbtCatalogNode], model_id: str, column_name: str):
