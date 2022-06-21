@@ -3,6 +3,7 @@ import json
 import logging
 import pathlib
 import os
+from typing import List
 try:
     from importlib.metadata import version
 except ImportError:
@@ -101,10 +102,7 @@ def run():
     args = argparser.parse_args()
     run_convert(args.target_dir, args.project_dir, args.output_dir, args.tag, args.log_level)
 
-
-def get_me(a):
-    return manifest.nodes.get(a)
-    
+   
 def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOKML_OUTPUT_DIR, tag=None, log_level='INFO'):
     logging.basicConfig(
         level=getattr(logging, log_level),
@@ -123,16 +121,12 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
     typed_dbt_exposures: List[models.DbtExposure] = parser.parse_exposures(raw_manifest, tag=tag)
     adapter_type = parser.parse_adapter_type(raw_manifest)
 
-    # manifest = models.DbtManifest(**raw_manifest)    
-    # exposure_nodes = [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
-
     # Generate lookml views
     lookml_views = [
         generator.lookml_view_from_dbt_model(model, adapter_type)
         for model in typed_dbt_models
     ]
-    
-    
+        
     pathlib.Path(os.path.join(output_dir, 'views')).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
         with open(os.path.join(output_dir, 'views', view.filename), 'w') as f:
@@ -156,16 +150,7 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
             f.write(model.contents)
 
 
-    # Generate Lookml models from exposures
-    lookml_exposure_models = [
-        generator.lookml_model_from_exposure_dbt_model(model, dbt_project_config.name)
-        for model in typed_dbt_exposures
-    ]
-    for model in lookml_exposure_models:
-        with open(os.path.join(output_dir, model.filename), 'w') as f:
-            f.write(model.contents)
-
     logging.info(f'Generated {len(lookml_models)} lookml models in {output_dir}')
-    logging.info(f'Generated {len(lookml_exposure_models)} lookml exposure models in {output_dir}')
+    logging.info(f'Generated {len(lookml_models_exposures)} lookml exposure models in {output_dir}')
     logging.info('Success')
 
