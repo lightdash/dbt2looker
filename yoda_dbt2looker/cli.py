@@ -117,10 +117,13 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
 
     # Get dbt models from manifestpo
     dbt_project_config = parser.parse_dbt_project_config(raw_config)
-    typed_dbt_models = parser.parse_typed_models(raw_manifest, raw_catalog, tag=tag)
+    typed_dbt_models = parser.parse_typed_models(raw_manifest, raw_catalog, dbt_project_config.name, tag=tag)
     typed_dbt_exposures: List[models.DbtExposure] = parser.parse_exposures(raw_manifest, tag=tag)
     adapter_type = parser.parse_adapter_type(raw_manifest)
 
+
+    typed_dbt_exposures
+    
     # Generate lookml views
     lookml_views = [
         generator.lookml_view_from_dbt_model(model, adapter_type)

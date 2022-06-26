@@ -5,6 +5,7 @@ import importlib.resources
 from typing import Dict, Optional, List, Union
 from functools import reduce
 
+from .generator import _extract_all_refs
 from . import models
 
 
@@ -94,12 +95,24 @@ def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel
             logging.debug('Model %s has no typed columns, no dimensions will be generated. %s', model.unique_id, model)
 
 
-def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
+def parse_typed_models(raw_manifest: dict, raw_catalog: dict, dbt_project_name: str, tag: Optional[str] = None):
     catalog_nodes = parse_catalog_nodes(raw_catalog)
     dbt_models = parse_models(raw_manifest, tag=tag)
     manifest = models.DbtManifest(**raw_manifest)
     typed_dbt_exposures: List[models.DbtExposure] = parse_exposures(raw_manifest, tag=tag)
     exposure_nodes = [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
+    
+    exposure_model_views = set()    
+    for exposure in typed_dbt_exposures:       
+        exposure_model_views.add(_extract_all_refs(exposure.meta.looker.explore_name)[0])
+        for item in reduce(list.__add__, [ _extract_all_refs(join.sql_on) for join in exposure.meta.looker.joins]):
+            exposure_model_views.add(item)
+    
+    for model in exposure_model_views:
+        model_loopup = f"model.{dbt_project_name}.{model}"
+        model_node = manifest.nodes.get(model_loopup)
+        exposure_nodes.append(model_node)
+        
     adapter_type = parse_adapter_type(raw_manifest)
     dbt_models = dbt_models + exposure_nodes
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))

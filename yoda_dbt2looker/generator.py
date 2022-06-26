@@ -324,6 +324,22 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
 def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str):
     pass
 
+# def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
+#     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
+#     matches = re.findall(reg_ref, ref_str)
+#     if not matches or len(matches) == 0:
+#         return None
+    
+#     ref_str = ref_str.replace(" ", "")
+#     for group_value in matches:
+#         model_loopup = f"model.{project_name}.{group_value.strip()}"
+#         model_node = manifest.nodes.get(model_loopup)        
+#         ref_str = ref_str.replace(f"ref('{group_value}')",model_node.relation_name)
+#     ref_str = ref_str.replace("="," = ")
+    
+#     return ref_str
+    
+
 def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
@@ -332,13 +348,25 @@ def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_nam
     
     ref_str = ref_str.replace(" ", "")
     for group_value in matches:
-        model_loopup = f"model.{project_name}.{group_value.strip()}"
-        model_node = manifest.nodes.get(model_loopup)        
-        ref_str = ref_str.replace(f"ref('{group_value}')",model_node.relation_name)
+        ref_str = ref_str.replace(f"ref('{group_value}')",group_value)
     ref_str = ref_str.replace("="," = ")
     
     return ref_str
+
+def _extract_all_refs(ref_str : str) -> list[str]:
+    reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
+    matches = re.findall(reg_ref, ref_str)
+    if not matches or len(matches) == 0:
+        return None
+    refs = []
+    ref_str = ref_str.replace(" ", "")
+    for group_value in matches:
+        refs.append(group_value)
     
+    return refs
+
+
+# def get_view_models_from_exposure()
 
 def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str):
     # Note: assumes view names = model names
@@ -361,10 +389,12 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
         }
     }
     if model.meta.looker:
+        refs = _extract_all_refs(model.meta.looker.explore_name)
         relation_name = _convert_all_refs_to_relation_name(manifest, dbt_project_name, model.meta.looker.explore_name)
         if not relation_name:
-            logger.error(f"Invalid ref {model.meta.looker.explore_name}")
-        
+            logging.error(f"Invalid ref {model.meta.looker.explore_name}")
+
+       
         lookml = {
             'connection': dbt_project_name,
             'include': 'views/*',
@@ -377,8 +407,8 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
                         'type': join.type.value,
                         'relationship': join.relationship.value,
                         'sql_on': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.sql_on),
-                    }                
-                     for join in model.meta.looker.joins                                
+                    }
+                     for join in model.meta.looker.joins
                 ]
             }
         }
