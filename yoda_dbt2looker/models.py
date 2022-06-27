@@ -78,6 +78,7 @@ class Dbt2LookerMeasure(BaseModel):
     description: Optional[str]
     sql: Optional[str]
     value_format_name: Optional[LookerValueFormatName]
+    group_label: Optional[str]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
