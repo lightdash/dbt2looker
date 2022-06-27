@@ -353,8 +353,6 @@ def _extract_all_refs(ref_str : str) -> list[str]:
     return refs
 
 
-# def get_view_models_from_exposure()
-
 def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
