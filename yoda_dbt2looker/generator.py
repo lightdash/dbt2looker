@@ -325,22 +325,7 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
 
 def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str):
     pass
-
-# def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
-#     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
-#     matches = re.findall(reg_ref, ref_str)
-#     if not matches or len(matches) == 0:
-#         return None
-    
-#     ref_str = ref_str.replace(" ", "")
-#     for group_value in matches:
-#         model_loopup = f"model.{project_name}.{group_value.strip()}"
-#         model_node = manifest.nodes.get(model_loopup)        
-#         ref_str = ref_str.replace(f"ref('{group_value}')",model_node.relation_name)
-#     ref_str = ref_str.replace("="," = ")
-    
-#     return ref_str
-    
+  
 
 def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
