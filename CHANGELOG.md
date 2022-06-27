@@ -2,6 +2,13 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.10.0
+### Added
+Support for dbt 1.x
+
+### Removed
+Support for dbt <1.x
+
 ## 0.9.3
 ### Fixed
 - Fix name of models and view to add lkml suffix
