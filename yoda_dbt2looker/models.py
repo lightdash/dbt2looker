@@ -78,7 +78,6 @@ class Dbt2LookerMeasure(BaseModel):
     description: Optional[str]
     sql: Optional[str]
     value_format_name: Optional[LookerValueFormatName]
-    group_label: Optional[str]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
@@ -166,6 +165,7 @@ class DbtModel(DbtNode):
     columns: Dict[str, DbtModelColumn]
     tags: List[str]
     meta: DbtModelMeta
+    create_explorer: bool = True
 
     @validator('columns')
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):

@@ -100,7 +100,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, dbt_project_name: 
     dbt_models = parse_models(raw_manifest, tag=tag)
     manifest = models.DbtManifest(**raw_manifest)
     typed_dbt_exposures: List[models.DbtExposure] = parse_exposures(raw_manifest, tag=tag)
-    exposure_nodes = [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
+    exposure_nodes = []# [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
     
     exposure_model_views = set()    
     for exposure in typed_dbt_exposures:       
@@ -111,6 +111,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, dbt_project_name: 
     for model in exposure_model_views:
         model_loopup = f"model.{dbt_project_name}.{model}"
         model_node = manifest.nodes.get(model_loopup)
+        model_node.create_explorer = False        
         exposure_nodes.append(model_node)
         
     adapter_type = parse_adapter_type(raw_manifest)

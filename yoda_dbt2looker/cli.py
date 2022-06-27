@@ -122,8 +122,6 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
     adapter_type = parser.parse_adapter_type(raw_manifest)
 
 
-    typed_dbt_exposures
-    
     # Generate lookml views
     lookml_views = [
         generator.lookml_view_from_dbt_model(model, adapter_type)
@@ -142,7 +140,7 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
     lookml_models = [
         generator.lookml_model_from_dbt_model(manifest, model, dbt_project_config.name)
         for model in typed_dbt_models
-        if parser.tags_match(tag, model)
+        if parser.tags_match(tag, model) and model.create_explorer
     ]
     lookml_models_exposures = [
         generator.lookml_model_from_dbt_model(manifest, exposure, dbt_project_config.name)
