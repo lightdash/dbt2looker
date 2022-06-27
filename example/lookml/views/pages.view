@@ -67,6 +67,7 @@ view: pages {
     type: count
     sql: ${TABLE}.id ;;
     description: "Count of The primary key for this table"
+    group_label: "Blog Info"
     filters: [
       path: "/blog%",
     ]

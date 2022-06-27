@@ -30,6 +30,7 @@ models:
             total_page_views:
               type: count        # any looker aggregate measure
             blog_views:
+              group_label: Blog Info     # Optional - specify a group label for the measure
               type: count
               value_format_name: decimal_0     # Optional - specify a format for the dimension
               filters:
