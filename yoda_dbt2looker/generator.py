@@ -278,22 +278,26 @@ def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtM
 
 
 def lookml_measures_from_model(model: models.DbtModel):
-    return [
+    measures = [
         lookml_measure(measure_name, column, measure, model)
         for column in model.columns.values()
         for measure_name, measure in {
             **column.meta.measures, **column.meta.measure, **column.meta.metrics, **column.meta.metric
         }.items()
     ]
+    measures.append(lookml_measure(measure_name=f"{model.name}_count", column=None, measure=models.Dbt2LookerMeasure(type=models.LookerAggregateMeasures.count, description="Default count measure"), model=None))
+    return measures
 
 
 def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: models.Dbt2LookerMeasure, model: models.DbtModel):
     m = {
         'name': measure_name,
-        'type': measure.type.value,
-        'sql': measure.sql or f'${{TABLE}}.{column.name}',
-        'description': measure.description or column.description or f'{measure.type.value.capitalize()} of {column.name}',
+        'type': measure.type.value,        
+        'description': measure.description or column.description if column else None or f'{measure.type.value.capitalize()} of {column.name}' if column else "",
     }
+    sql = measure.sql or f'${{TABLE}}.{column.name}' if column else None
+    if sql:
+        m['sql'] = sql
     if measure.filters:
         m['filters'] = lookml_measure_filters(measure, model)
     if measure.value_format_name:
