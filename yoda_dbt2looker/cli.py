@@ -3,6 +3,7 @@ import json
 import logging
 import pathlib
 import os
+from typing import List
 try:
     from importlib.metadata import version
 except ImportError:
@@ -17,6 +18,7 @@ except ImportError:
 
 from . import parser
 from . import generator
+from . import models
 
 MANIFEST_PATH = './manifest.json'
 DEFAULT_LOOKML_OUTPUT_DIR = './lookml'
@@ -100,6 +102,7 @@ def run():
     args = argparser.parse_args()
     run_convert(args.target_dir, args.project_dir, args.output_dir, args.tag, args.log_level)
 
+   
 def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOKML_OUTPUT_DIR, tag=None, log_level='INFO'):
     logging.basicConfig(
         level=getattr(logging, log_level),
@@ -114,14 +117,17 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
 
     # Get dbt models from manifestpo
     dbt_project_config = parser.parse_dbt_project_config(raw_config)
-    typed_dbt_models = parser.parse_typed_models(raw_manifest, raw_catalog, tag=tag)
+    typed_dbt_models = parser.parse_typed_models(raw_manifest, raw_catalog, dbt_project_config.name, tag=tag)
+    typed_dbt_exposures: List[models.DbtExposure] = parser.parse_exposures(raw_manifest, tag=tag)
     adapter_type = parser.parse_adapter_type(raw_manifest)
+
 
     # Generate lookml views
     lookml_views = [
         generator.lookml_view_from_dbt_model(model, adapter_type)
         for model in typed_dbt_models
     ]
+        
     pathlib.Path(os.path.join(output_dir, 'views')).mkdir(parents=True, exist_ok=True)
     for view in lookml_views:
         with open(os.path.join(output_dir, 'views', view.filename), 'w') as f:
@@ -130,13 +136,22 @@ def run_convert(target_dir='./target', project_dir='./', output_dir=DEFAULT_LOOK
     logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(output_dir, "views")}')
 
     # Generate Lookml models
+    manifest = models.DbtManifest(**raw_manifest)
     lookml_models = [
-        generator.lookml_model_from_dbt_model(model, dbt_project_config.name)
+        generator.lookml_model_from_dbt_model(manifest, model, dbt_project_config.name)
         for model in typed_dbt_models
+        if parser.tags_match(tag, model) and model.create_explorer
     ]
-    for model in lookml_models:
+    lookml_models_exposures = [
+        generator.lookml_model_from_dbt_model(manifest, exposure, dbt_project_config.name)
+        for exposure in typed_dbt_exposures
+    ]
+    for model in lookml_models + lookml_models_exposures:
         with open(os.path.join(output_dir, model.filename), 'w') as f:
             f.write(model.contents)
+
+
     logging.info(f'Generated {len(lookml_models)} lookml models in {output_dir}')
+    logging.info(f'Generated {len(lookml_models_exposures)} lookml exposure models in {output_dir}')
     logging.info('Success')
 

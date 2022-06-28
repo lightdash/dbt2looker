@@ -78,7 +78,6 @@ class Dbt2LookerMeasure(BaseModel):
     description: Optional[str]
     sql: Optional[str]
     value_format_name: Optional[LookerValueFormatName]
-    group_label: Optional[str]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
@@ -144,7 +143,12 @@ class Dbt2LookerExploreJoin(BaseModel):
     sql_on: str
 
 
+class Dbt2MetaLookerModelMeta(BaseModel):
+    joins: Optional[List[Dbt2LookerExploreJoin]] = []
+    explore_name: str
+    
 class Dbt2LookerModelMeta(BaseModel):
+    looker: Optional[Dbt2MetaLookerModelMeta] 
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
 
 
@@ -161,6 +165,7 @@ class DbtModel(DbtNode):
     columns: Dict[str, DbtModelColumn]
     tags: List[str]
     meta: DbtModelMeta
+    create_explorer: bool = True
 
     @validator('columns')
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):
@@ -169,6 +174,18 @@ class DbtModel(DbtNode):
             for name, column in v.items()
         }
 
+
+class DbtExposureDependsOn(BaseModel):
+    macros: List[str]
+    nodes: List[str]
+    
+class DbtExposure(DbtNode):
+    resource_type: Literal['exposure']
+    name: str
+    description: str
+    tags: List[str]
+    depends_on: DbtExposureDependsOn
+    meta: DbtModelMeta
 
 class DbtManifestMetadata(BaseModel):
     adapter_type: str
@@ -184,6 +201,7 @@ class DbtManifestMetadata(BaseModel):
 
 class DbtManifest(BaseModel):
     nodes: Dict[str, Union[DbtModel, DbtNode]]
+    exposures: Dict[str, Union[DbtExposure, DbtNode]]
     metadata: DbtManifestMetadata
 
 
