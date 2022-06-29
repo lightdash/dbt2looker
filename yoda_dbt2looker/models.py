@@ -186,6 +186,8 @@ class DbtExposure(DbtNode):
     tags: List[str]
     depends_on: DbtExposureDependsOn
     meta: DbtModelMeta
+    original_file_path: str
+    path: str
 
 class DbtManifestMetadata(BaseModel):
     adapter_type: str

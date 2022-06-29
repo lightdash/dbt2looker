@@ -1,6 +1,6 @@
 import logging
 import re
-
+from pathlib import Path
 import lkml
 
 from . import models
@@ -393,7 +393,6 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
         }
     }
     if model.meta.looker:
-        refs = _extract_all_refs(model.meta.looker.explore_name)
         relation_name = _convert_all_refs_to_relation_name(manifest, dbt_project_name, model.meta.looker.explore_name)
         if not relation_name:
             logging.error(f"Invalid ref {model.meta.looker.explore_name}")
@@ -407,7 +406,7 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
                 'description': model.description,
                 'joins': [
                     {
-                        'name': join.join,
+                        'name': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.join),
                         'type': join.type.value,
                         'relationship': join.relationship.value,
                         'sql_on': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.sql_on),
@@ -416,32 +415,10 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
                 ]
             }
         }
-    
-    contents = lkml.dump(lookml)
-    filename = f'{model.name}.model.lkml'
+    model_loopup = f"exposure.{dbt_project_name}.{model.name}"        
+    exposurel_node = manifest.exposures.get(model_loopup)        
+    file_name = Path(exposurel_node.original_file_path).stem
+    filename = f'{file_name}.model.lkml'
+    contents = lkml.dump(lookml)    
     return models.LookModelFile(filename=filename, contents=contents)
 
-
-def lookml_model_from_exposure_dbt_model(model: models.DbtModel, dbt_project_name: str):
-    # Note: assumes view names = model names
-    #       and models are unique across dbt packages in project
-    lookml = {
-        'connection': dbt_project_name,
-        'include': 'views/*',
-        'explore': {
-            'name': model.name,
-            'description': model.description,
-            'joins': [
-                {
-                    'name': join.join,
-                    'type': join.type.value,
-                    'relationship': join.relationship.value,
-                    'sql_on': join.sql_on,
-                }
-                for join in model.meta.joins
-            ]
-        }
-    }
-    contents = lkml.dump(lookml)
-    filename = f'{model.name}.model.lkml'
-    return models.LookModelFile(filename=filename, contents=contents)
