@@ -153,7 +153,7 @@ class Dbt2LookerModelMeta(BaseModel):
 
 
 class DbtModelMeta(Dbt2LookerModelMeta):
-    pass
+    primary_key: Optional[str]
 
 
 class DbtModel(DbtNode):
@@ -183,6 +183,7 @@ class DbtExposure(DbtNode):
     resource_type: Literal['exposure']
     name: str
     description: str
+    original_file_path: str
     tags: List[str]
     depends_on: DbtExposureDependsOn
     meta: DbtModelMeta
