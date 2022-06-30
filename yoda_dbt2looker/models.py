@@ -153,7 +153,7 @@ class Dbt2LookerModelMeta(BaseModel):
 
 
 class DbtModelMeta(Dbt2LookerModelMeta):
-    primary_key : Optional[str]
+    primary_key : Optional[str]= Field(None, alias='primary-key')
 
 
 class DbtModel(DbtNode):
