@@ -246,7 +246,7 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
             'description': column.meta.dimension.description or column.description,
-            # **({ 'primary_key': 'yes' } if model.meta.primary_key == column.name else {}),
+            **({ 'primary_key': 'yes' } if model.meta.primary_key == column.name else {}),
             **(
                 {'value_format_name': column.meta.dimension.value_format_name.value}
                 if (column.meta.dimension.value_format_name
@@ -349,7 +349,7 @@ def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_nam
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
     if not matches or len(matches) == 0:
-        return None
+        return ref_str
     
     ref_str = ref_str.replace(" ", "")
     for group_value in matches:
