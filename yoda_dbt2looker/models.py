@@ -153,7 +153,7 @@ class Dbt2LookerModelMeta(BaseModel):
 
 
 class DbtModelMeta(Dbt2LookerModelMeta):
-    pass
+    primary_key : str
 
 
 class DbtModel(DbtNode):
