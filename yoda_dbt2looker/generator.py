@@ -246,7 +246,7 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
             'description': column.meta.dimension.description or column.description,
-            **({ 'primary_key': 'yes' } if model.meta.primary_key == column.name else {})
+            **({ 'primary_key': 'yes' } if model.meta.primary_key and model.meta.primary_key == column.name else {}),
             **(
                 {'value_format_name': column.meta.dimension.value_format_name.value}
                 if (column.meta.dimension.value_format_name
