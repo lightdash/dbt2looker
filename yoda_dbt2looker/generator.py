@@ -286,7 +286,7 @@ def lookml_measures_from_model(model: models.DbtModel):
             **column.meta.measures, **column.meta.measure, **column.meta.metrics, **column.meta.metric
         }.items()
     ]
-    measures.append(lookml_measure(measure_name=f"{model.name}_count", column=None, measure=models.Dbt2LookerMeasure(type=models.LookerAggregateMeasures.count, description="Default count measure"), model=None))
+    measures.append(lookml_measure(measure_name="count", column=None, measure=models.Dbt2LookerMeasure(type=models.LookerAggregateMeasures.count, description="Default count measure"), model=None))
     return measures
 
 
