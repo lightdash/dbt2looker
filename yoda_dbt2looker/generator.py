@@ -1,6 +1,6 @@
 import logging
 import re
-
+from pathlib import Path
 import lkml
 
 from . import models
@@ -193,6 +193,8 @@ def normalise_spark_types(column_type: str) -> str:
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
+    if column_type is None:
+        return None
     normalised_column_type = normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
     if (column_type is not None) and (looker_type is None):
@@ -244,6 +246,7 @@ def lookml_dimensions_from_model(model: models.DbtModel, adapter_type: models.Su
             'type': map_adapter_type_to_looker(adapter_type, column.data_type),
             'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
             'description': column.meta.dimension.description or column.description,
+            **({ 'primary_key': 'yes' } if model.meta.primary_key == column.name else {}),
             **(
                 {'value_format_name': column.meta.dimension.value_format_name.value}
                 if (column.meta.dimension.value_format_name
@@ -276,28 +279,30 @@ def lookml_measure_filters(measure: models.Dbt2LookerMeasure, model: models.DbtM
 
 
 def lookml_measures_from_model(model: models.DbtModel):
-    return [
+    measures = [
         lookml_measure(measure_name, column, measure, model)
         for column in model.columns.values()
         for measure_name, measure in {
             **column.meta.measures, **column.meta.measure, **column.meta.metrics, **column.meta.metric
         }.items()
     ]
+    measures.append(lookml_measure(measure_name="count", column=None, measure=models.Dbt2LookerMeasure(type=models.LookerAggregateMeasures.count, description="Default count measure"), model=None))
+    return measures
 
 
 def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: models.Dbt2LookerMeasure, model: models.DbtModel):
     m = {
         'name': measure_name,
-        'type': measure.type.value,
-        'sql': measure.sql or f'${{TABLE}}.{column.name}',
-        'description': measure.description or column.description or f'{measure.type.value.capitalize()} of {column.name}',
+        'type': measure.type.value,        
+        'description': measure.description or (column.description if column else None) or (f'{measure.type.value.capitalize()} of {column.name}' if column else ""),
     }
+    sql = measure.sql or f'${{TABLE}}.{column.name}' if column else None
+    if sql:
+        m['sql'] = sql
     if measure.filters:
         m['filters'] = lookml_measure_filters(measure, model)
     if measure.value_format_name:
         m['value_format_name'] = measure.value_format_name.value
-    if measure.group_label:
-        m['group_label'] = measure.group_label
     return m
 
 
@@ -321,13 +326,59 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     filename = f'{model.name}.view.lkml'
     return models.LookViewFile(filename=filename, contents=contents)
 
+def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str):
+    pass
 
-def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
+# def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
+#     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
+#     matches = re.findall(reg_ref, ref_str)
+#     if not matches or len(matches) == 0:
+#         return None
+    
+#     ref_str = ref_str.replace(" ", "")
+#     for group_value in matches:
+#         model_loopup = f"model.{project_name}.{group_value.strip()}"
+#         model_node = manifest.nodes.get(model_loopup)        
+#         ref_str = ref_str.replace(f"ref('{group_value}')",model_node.relation_name)
+#     ref_str = ref_str.replace("="," = ")
+    
+#     return ref_str
+    
+
+def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
+    reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
+    matches = re.findall(reg_ref, ref_str)
+    if not matches or len(matches) == 0:
+        return ref_str
+    
+    ref_str = ref_str.replace(" ", "")
+    for group_value in matches:
+        ref_str = ref_str.replace(f"ref('{group_value}')",group_value)
+    ref_str = ref_str.replace("="," = ")
+    
+    return ref_str
+
+def _extract_all_refs(ref_str : str) -> list[str]:
+    reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
+    matches = re.findall(reg_ref, ref_str)
+    if not matches or len(matches) == 0:
+        return None
+    refs = []
+    ref_str = ref_str.replace(" ", "")
+    for group_value in matches:
+        refs.append(group_value)
+    
+    return refs
+
+
+# def get_view_models_from_exposure()
+
+def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
     lookml = {
         'connection': dbt_project_name,
-        'include': '/views/*',
+        'include': 'views/*',
         'explore': {
             'name': model.name,
             'description': model.description,
@@ -342,6 +393,33 @@ def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
             ]
         }
     }
-    contents = lkml.dump(lookml)
-    filename = f'{model.name}.model.lkml'
+    if model.meta.looker:
+        relation_name = _convert_all_refs_to_relation_name(manifest, dbt_project_name, model.meta.looker.explore_name)
+        if not relation_name:
+            logging.error(f"Invalid ref {model.meta.looker.explore_name}")
+
+       
+        lookml = {
+            'connection': dbt_project_name,
+            'include': 'views/*',
+            'explore': {
+                'name': relation_name,
+                'description': model.description,
+                'joins': [
+                    {
+                        'name': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.join),
+                        'type': join.type.value,
+                        'relationship': join.relationship.value,
+                        'sql_on': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.sql_on),
+                    }
+                     for join in model.meta.looker.joins
+                ]
+            }
+        }
+    model_loopup = f"exposure.{dbt_project_name}.{model.name}"        
+    exposurel_node = manifest.exposures.get(model_loopup)        
+    file_name = Path(exposurel_node.original_file_path).stem
+    filename = f'{file_name}.model.lkml'
+    contents = lkml.dump(lookml)    
     return models.LookModelFile(filename=filename, contents=contents)
+
