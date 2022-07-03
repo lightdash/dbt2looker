@@ -294,7 +294,7 @@ def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: mo
     m = {
         'name': measure_name,
         'type': measure.type.value,        
-        'description': measure.description or column.description if column else None or f'{measure.type.value.capitalize()} of {column.name}' if column else "",
+        'description': measure.description or (column.description if column else None) or (f'{measure.type.value.capitalize()} of {column.name}' if column else ""),
     }
     sql = measure.sql or f'${{TABLE}}.{column.name}' if column else None
     if sql:
