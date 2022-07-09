@@ -2,5 +2,6 @@
     "jira-plugin.workingProject": "",
     "files.associations": {
         "*.yaml": "home-assistant"
-    }
+    },
+    "python.testing.pytestEnabled": true
 }
