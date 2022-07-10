@@ -355,6 +355,8 @@ def _convert_all_refs_to_relation_name(ref_str : str) -> str:
     for group_value in matches:
         ref_str = ref_str.replace(f"ref('{group_value}')",group_value)
     ref_str = ref_str.replace("="," = ")
+    # in case of a compound expression with logical operator , i.e : ${join1} and ${join2} - we would like
+    # to add a space between the logical operator so all elements between }...$ are captured and added a pre and post space
     ref_str=re.sub(r'}(.*?)\$', r'} \1 $',ref_str)
     return ref_str
 
