@@ -345,7 +345,7 @@ def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str)
 #     return ref_str
     
 
-def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_name: str, ref_str : str) -> str:
+def _convert_all_refs_to_relation_name(ref_str : str) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
     if not matches or len(matches) == 0:
@@ -355,7 +355,9 @@ def _convert_all_refs_to_relation_name(manifest: models.DbtManifest, project_nam
     for group_value in matches:
         ref_str = ref_str.replace(f"ref('{group_value}')",group_value)
     ref_str = ref_str.replace("="," = ")
-    
+    # in case of a compound expression with logical operator , i.e : ${join1} and ${join2} - we would like
+    # to add a space between the logical operator so all elements between }...$ are captured and added a pre and post space
+    ref_str=re.sub(r'}(.*?)\$', r'} \1 $',ref_str)
     return ref_str
 
 def _extract_all_refs(ref_str : str) -> list[str]:
@@ -394,7 +396,7 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
         }
     }
     if model.meta.looker:
-        relation_name = _convert_all_refs_to_relation_name(manifest, dbt_project_name, model.meta.looker.explore_name)
+        relation_name = _convert_all_refs_to_relation_name(model.meta.looker.explore_name)
         if not relation_name:
             logging.error(f"Invalid ref {model.meta.looker.explore_name}")
 
@@ -407,10 +409,10 @@ def lookml_model_from_dbt_model(manifest: models.DbtManifest, model: models.DbtM
                 'description': model.description,
                 'joins': [
                     {
-                        'name': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.join),
+                        'name': _convert_all_refs_to_relation_name(join.join),
                         'type': join.type.value,
                         'relationship': join.relationship.value,
-                        'sql_on': _convert_all_refs_to_relation_name(manifest, dbt_project_name, join.sql_on),
+                        'sql_on': _convert_all_refs_to_relation_name(join.sql_on),
                     }
                      for join in model.meta.looker.joins
                 ]
