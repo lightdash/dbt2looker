@@ -225,7 +225,7 @@ def test__generate_compound_primary_key_compound_return_dict():
    assert generator._generate_compound_primary_key_if_needed(model)  == {
             "name": "primary_key",
             "primary_key": "yes",
-            "sql": 'CONCAT(${TABLE}.col1,${TABLE}.col2) ;;',
+            "sql": 'CONCAT(${TABLE}.col1,${TABLE}.col2) ',
             "description": f"auto generated compound key from the columns:col1 , col2",
         }
 
