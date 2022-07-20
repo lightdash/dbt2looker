@@ -307,7 +307,7 @@ def _generate_compound_primary_key_if_needed(model: models.DbtModel) -> dict:
         return {
             "name": "primary_key",
             "primary_key": "yes",
-            "sql": f'CONCAT({",".join(concat_keys)}) ;;',
+            "sql": f'CONCAT({",".join(concat_keys)}) ',
             "description": f"auto generated compound key from the columns:{model.meta.primary_key}",
         }
     return None
