@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yoda-dbt2looker"
-version = "0.9.22"
+version = "0.9.23"
 description = "Generate lookml view files from dbt models"
 authors = ["oliverlaslett <oliver@gethubble.io>", "chaimturkel <cyturel@gmail.com>"]
 license = "MIT"
