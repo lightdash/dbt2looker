@@ -1,6 +1,7 @@
 import logging
 import re
 from pathlib import Path
+from typing import Optional
 import lkml
 
 from . import models
@@ -299,7 +300,7 @@ def _generate_dimensions(model, adapter_type):
     ]
 
 
-def _generate_compound_primary_key_if_needed(model: models.DbtModel) -> dict:
+def _generate_compound_primary_key_if_needed(model: models.DbtModel) -> Optional[dict]:
     if model.meta.primary_key and "," in model.meta.primary_key:
         concat_keys = [
             f"${{TABLE}}.{key.strip()}" for key in model.meta.primary_key.split(",")
