@@ -332,7 +332,7 @@
         }
       },
       "patternProperties": {
-        "^measures?|metrics?$": {
+        "^measures?$": {
           "type": "object",
           "description": "Object containing measures definitions. Keys ust be valid measure names and unique in this model.",
           "patternProperties": {
