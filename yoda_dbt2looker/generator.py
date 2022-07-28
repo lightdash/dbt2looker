@@ -340,6 +340,7 @@ def lookml_measures_from_model(model: models.DbtModel):
         lookml_measure(measure_name, column, measure, model)
         for column in model.columns.values()
         for measure_name, measure in {
+            **column.meta.looker.measures,
             **column.meta.measures,
             **column.meta.measure,
             **column.meta.metrics,
