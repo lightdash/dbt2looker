@@ -96,7 +96,15 @@ class Dbt2LookerDimension(BaseModel):
     value_format_name: Optional[LookerValueFormatName]
 
 
+class Dbt2InnerLookerMeta(BaseModel):
+    measures: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    measure: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metrics: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metric: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    dimension: Optional[Dbt2LookerDimension] = Dbt2LookerDimension()
+    
 class Dbt2LookerMeta(BaseModel):
+    looker: Optional[Dbt2InnerLookerMeta] = Dbt2InnerLookerMeta()
     measures: Optional[Dict[str, Dbt2LookerMeasure]] = {}
     measure: Optional[Dict[str, Dbt2LookerMeasure]] = {}
     metrics: Optional[Dict[str, Dbt2LookerMeasure]] = {}

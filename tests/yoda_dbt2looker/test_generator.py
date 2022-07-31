@@ -1,4 +1,4 @@
-from yoda_dbt2looker import generator
+from yoda_dbt2looker import generator, models
 from unittest.mock import MagicMock, patch, call
 
 
@@ -254,3 +254,17 @@ def test_lookml_dimensions_from_model_has_compound_key_return_joined_list(genera
    assert generate_dimensions_mock.mock_calls == [call(model , adapter_type)]
    assert generate_compound_primary_key_if_needed_mock.mock_calls[0] == call(model) 
 
+def test_looker_inner_on_column_meta():
+    columns = dict()
+    columns["col_name"] = models.DbtModelColumn(name="test", description="", meta=models.DbtModelColumnMeta())
+    columns["col_name"].meta.looker = models.Dbt2InnerLookerMeta()
+    
+    columns["col_name"].meta.looker.measures = {}
+    columns["col_name"].meta.looker.measures["one"] = models.Dbt2LookerMeasure(type = models.LookerAggregateMeasures.average, description="test measure", sql="a=b")
+        
+    model_meta = models.DbtModelMeta()
+    model: models.DbtModel = models.DbtModel(unique_id="a", resource_type="model", relation_name="", schema="", name="test", description="", tags=[], columns=columns, meta= model_meta)
+    model.name = "test"    
+
+    value = generator.lookml_measures_from_model(model)
+    assert value == [{'name': 'one', 'type': 'average', 'description': 'test measure', 'sql': 'a=b'}, {'name': 'count', 'type': 'count', 'description': 'Default count measure'}]
