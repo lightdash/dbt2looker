@@ -104,7 +104,7 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, dbt_project_name: 
     
     exposure_model_views = set()    
     for exposure in typed_dbt_exposures:       
-        exposure_model_views.add(_extract_all_refs(exposure.meta.looker.explore_name)[0])
+        exposure_model_views.add(_extract_all_refs(exposure.meta.looker.main_model)[0])
         for item in reduce(list.__add__, [ _extract_all_refs(join.sql_on) for join in exposure.meta.looker.joins]):
             exposure_model_views.add(item)
     

@@ -456,11 +456,8 @@ def _extract_all_refs(ref_str: str) -> list[str]:
     return refs
 
 
-# def get_view_models_from_exposure()
-
-
-def lookml_model_from_dbt_model(
-    manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str
+def lookml_model_data_from_dbt_model(
+    model: models.DbtModel, dbt_project_name: str
 ):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
@@ -483,10 +480,10 @@ def lookml_model_from_dbt_model(
     }
     if model.meta.looker:
         relation_name = _convert_all_refs_to_relation_name(
-            model.meta.looker.explore_name
+            model.meta.looker.main_model
         )
         if not relation_name:
-            logging.error(f"Invalid ref {model.meta.looker.explore_name}")
+            logging.error(f"Invalid ref {model.meta.looker.main_model}")
 
         lookml = {
             "connection": dbt_project_name,
@@ -505,9 +502,14 @@ def lookml_model_from_dbt_model(
                 ],
             },
         }
+    return lkml.dump(lookml)
+    
+def lookml_model_from_dbt_model(
+    manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str
+):
+    contents = lookml_model_data_from_dbt_model(model, dbt_project_name)
     model_loopup = f"exposure.{dbt_project_name}.{model.name}"
-    exposurel_node = manifest.exposures.get(model_loopup)
-    file_name = Path(exposurel_node.original_file_path).stem
-    filename = f"{file_name}.model.lkml"
-    contents = lkml.dump(lookml)
+    exposure_node = manifest.exposures.get(model_loopup)
+    file_name = Path(exposure_node.original_file_path).stem
+    filename = f"{file_name}.model.lkml"    
     return models.LookModelFile(filename=filename, contents=contents)
