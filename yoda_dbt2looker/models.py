@@ -153,7 +153,7 @@ class Dbt2LookerExploreJoin(BaseModel):
 
 class Dbt2MetaLookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
-    explore_name: str
+    main_model: str
     
 class Dbt2LookerModelMeta(BaseModel):
     looker: Optional[Dbt2MetaLookerModelMeta] 
