@@ -72,6 +72,11 @@ class LookerValueFormatName(str, Enum):
     percent_4 = 'percent_4'
 
 
+class LookerHiddenType(str, Enum):
+    yes = 'yes'
+    no = 'no'
+
+
 class Dbt2LookerMeasure(BaseModel):
     type: LookerAggregateMeasures
     filters: Optional[List[Dict[str, str]]] = []
@@ -79,6 +84,8 @@ class Dbt2LookerMeasure(BaseModel):
     sql: Optional[str]
     value_format_name: Optional[LookerValueFormatName]
     group_label: Optional[str]
+    label: Optional[str]
+    hidden: Optional[LookerHiddenType]
 
     @validator('filters')
     def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
