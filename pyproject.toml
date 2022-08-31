@@ -10,12 +10,12 @@ repository = "https://github.com/YotpoLtd/yoda-dbt2looker"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
-lkml = "^1.1.0"
-pydantic = "^1.8.1"
-PyYAML = "^5.4.1"
-jsonschema = "^3.2.0"
-typing-extensions = "^4.1.1"
-importlib-metadata = "^4.8.1"
+lkml = "^1.2.0"
+pydantic = "^1.10.1"
+PyYAML = "^6.0"
+jsonschema = "^4.15.0"
+typing-extensions = "^4.3.0"
+importlib-metadata = "^4.12.0"
 
 
 [tool.poetry.dev-dependencies]
