@@ -83,3 +83,4 @@ models:
              page_views:
                type: count
 ```
+
