@@ -110,13 +110,14 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, dbt_project_name: 
             raise Exception(f"Exposure main_model {exposure.meta.looker.main_model} should be ref('model_name')")
         exposure_model_views.add(ref_model[0])
         
-        for join in exposure.meta.looker.joins:
-            if _extract_all_refs(join.sql_on) == None:
-                logging.error(f"Exposure join.sql_on {join.sql_on} should be ref('model_name')")
-                raise Exception(f"Exposure join.sql_on {join.sql_on} should be ref('model_name')")
-        
-        for item in reduce(list.__add__, [ _extract_all_refs(join.sql_on) for join in exposure.meta.looker.joins]):
-            exposure_model_views.add(item)
+        if exposure.meta.looker.joins:
+            for join in exposure.meta.looker.joins:
+                if _extract_all_refs(join.sql_on) == None:
+                    logging.error(f"Exposure join.sql_on {join.sql_on} should be ref('model_name')")
+                    raise Exception(f"Exposure join.sql_on {join.sql_on} should be ref('model_name')")
+            
+            for item in reduce(list.__add__, [ _extract_all_refs(join.sql_on) for join in exposure.meta.looker.joins]):
+                exposure_model_views.add(item)
     
     for model in exposure_model_views:
         model_loopup = f"model.{dbt_project_name}.{model}"
