@@ -61,7 +61,7 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     all_models: List[models.DbtModel] = [
         node
         for node in manifest.nodes.values()
-        if node.resource_type == 'model'
+        if node.resource_type == 'model' and node.config['materialized'] != 'ephemeral'
     ]
 
     # Empty model files have many missing parameters

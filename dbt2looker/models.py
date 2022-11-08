@@ -142,6 +142,7 @@ class DbtModelColumn(BaseModel):
 class DbtNode(BaseModel):
     unique_id: str
     resource_type: str
+    config: Dict#[str, Any]
 
 
 class Dbt2LookerExploreJoin(BaseModel):
