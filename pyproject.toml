@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "dbt2looker"
-version = "0.7.0"
+version = "0.10.0"
 description = "Generate lookml view files from dbt models"
-authors = ["oliverlaslett <oliver@gethubble.io>"]
+authors = ["oliverlaslett <oliver@gethubble.io>", "chaimturkel <cyturel@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/hubble-data/dbt2looker"
@@ -13,6 +13,9 @@ python = ">=3.7"
 lkml = "^1.1.0"
 pydantic = "^1.8.1"
 PyYAML = "^5.4.1"
+jsonschema = "^3.2.0"
+typing-extensions = "^3.10.0"
+importlib-metadata = "^4.8.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -1,11 +1,31 @@
 import logging
-from typing import Dict, Optional, List
+import json
+import jsonschema
+import importlib.resources
+from typing import Dict, Optional, List, Union
+from functools import reduce
 
 from . import models
 
 
 def validate_manifest(raw_manifest: dict):
+    with importlib.resources.open_text("dbt2looker.dbt_json_schemas", "manifest_dbt2looker.json") as f:
+        schema = json.load(f)
+    v = jsonschema.Draft7Validator(schema)
+    hasError = False
+    for error in v.iter_errors(raw_manifest):
+        raise_error_context(error)
+        hasError = True
+    if hasError:
+        raise ValueError("Failed to parse dbt manifest.json")
     return True
+
+
+def raise_error_context(error: jsonschema.ValidationError, offset=''):
+    for error in sorted(error.context, key=lambda e: e.schema_path):
+        raise_error_context(error, offset=offset + '  ')
+    path = '.'.join([str(p) for p in error.absolute_path])
+    logging.error(f'{offset}Error in manifest at {path}: {error.message}')
 
 
 def validate_catalog(raw_catalog: dict):
@@ -26,20 +46,33 @@ def parse_adapter_type(raw_manifest: dict):
     return manifest.metadata.adapter_type
 
 
-def parse_models(raw_manifest: dict, tag=None):
+def tags_match(query_tag: str, model: models.DbtModel) -> bool:
+    try:
+        return query_tag in model.tags
+    except AttributeError:
+        return False
+    except ValueError:
+        # Is the tag just a string?
+        return query_tag == model.tags
+
+
+def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     manifest = models.DbtManifest(**raw_manifest)
-    all_models = [
+    all_models: List[models.DbtModel] = [
         node
         for node in manifest.nodes.values()
         if node.resource_type == 'model'
     ]
-    filtered_models = (
-        all_models if tag is None else [
-            model for model in all_models
-            if tag in model.tags
-        ]
-    )
-    return filtered_models
+
+    # Empty model files have many missing parameters
+    for model in all_models:
+        if not hasattr(model, 'name'):
+            logging.error('Cannot parse model with id: "%s" - is the model file empty?', model.unique_id)
+            raise SystemExit('Failed')
+
+    if tag is None:
+        return all_models
+    return [model for model in all_models if tags_match(tag, model)]
 
 
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):
@@ -54,13 +87,20 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     adapter_type = parse_adapter_type(raw_manifest)
 
     logging.debug('Parsed %d models from manifest.json', len(dbt_models))
+    for model in dbt_models:
+        logging.debug(
+            'Model %s has %d columns with %d measures',
+            model.name,
+            len(model.columns),
+            reduce(lambda acc, col: acc + len(col.meta.measures) + len(col.meta.measure) + len(col.meta.metrics) + len(col.meta.metric), model.columns.values(), 0)
+        )
 
     # Check catalog for models
     for model in dbt_models:
         if model.unique_id not in catalog_nodes:
             logging.warning(
                 f'Model {model.unique_id} not found in catalog. No looker view will be generated. '
-                f'Check if model has materialized in {adapter_type} at {model.database}.{model.db_schema}.{model.name}')
+                f'Check if model has materialized in {adapter_type} at {model.relation_name}')
 
     # Update dbt models with data types from catalog
     dbt_typed_models = [

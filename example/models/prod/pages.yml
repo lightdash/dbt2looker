@@ -1,25 +1,54 @@
 version: 2
 
+# A looker view is created for each model
 models:
+
+  # No additional config needed. Name and description of dbt model used for looker view
   - name: pages
     description: "Page views for Hubble landing page"
 
+
+    # A dimension is created for each column
     columns:
+
+      # No additional config needed. dimension takes column name and description from dbt
+      - name: path
+        description: "The page path. Everything after https://gethubble.io."
+
+      # Optionally, you can add lookml config to the meta: looker.com block
       - name: id
         description: "The primary key for this table"
         meta:
-          looker.com:
-            measures:
-              - name: Page views
-                type: count
-        tests:
-            - unique
-            - not_null
-      - name: path
-        description: "The page path. Everything after https://gethubble.io."
+
+          # Optional - override the dimension name for this column
+          dimension:
+            name: unique_page_view_id
+            value_format_name: id      # Optional - specify a format for a dimension
+
+          # Optional - add measures based on this column
+          measures:
+            total_page_views:
+              type: count        # any looker aggregate measure
+            blog_views:
+              group_label: Blog Info     # Optional - specify a group label for the measure
+              type: count
+              value_format_name: decimal_0     # Optional - specify a format for the dimension
+              filters:
+                - path: "/blog%"    # must filter on a valid dimension name
+
       - name: referring_domain
         description: "Website domain of the referrer. e.g. google.com"
       - name: viewed_at
         description: "Timestamp that page was viewed at"
       - name: date
         description: "Date that the page was viewed at"
+      - name: user_id
+        description: "persistent id of the user viewing the page"
+
+    # Optionally - specify how other models join to this table and an explore will be generated
+    meta:
+      joins:
+        - join: users                               # Reference another dbt model to join to
+          sql_on: "${users.id} = ${pages.user_id}"  # Sql string containing join clause
+          type: left_outer                          # Optional - left_outer is default
+          relationship: many_to_one                 # Optional - many_to_one is default

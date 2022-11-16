@@ -2,6 +2,8 @@
 
 Use `dbt2looker` to generate Looker view files automatically from dbt models.
 
+Want a deeper integration between dbt and your BI tool? You should also checkout [Lightdash - the open source alternative to Looker](https://github.com/lightdash/lightdash)
+
 **Features**
 
 * **Column descriptions** synced to looker
@@ -50,11 +52,17 @@ dbt2looker
 
 Requires [poetry](https://python-poetry.org/docs/) and python >=3.7
 
+For development, it is recommended to use python 3.7:
+
 ```
-# Install
+# Ensure you're using 3.7
+poetry env use 3.7  
+# alternative: poetry env use /usr/local/opt/python@3.7/bin/python3
+
+# Install dependencies and main package
 poetry install
 
-# Run
+# Run dbtlooker in poetry environment
 poetry run dbt2looker
 ```
 
@@ -71,8 +79,7 @@ models:
       - name: event_id
         description: unique event id for page view
         meta:
-          looker.com:  # looker config block for column
-             measures:
-               - name: Page views
-                 type: count
+           measures:
+             page_views:
+               type: count
 ```

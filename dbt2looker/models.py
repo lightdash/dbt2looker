@@ -1,5 +1,9 @@
 from enum import Enum
-from typing import Union, Dict, List, Literal, Optional
+from typing import Union, Dict, List, Optional
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 from pydantic import BaseModel, Field, PydanticValueError, validator
 
 
@@ -11,8 +15,10 @@ class UnsupportedDbtAdapterError(PydanticValueError):
 
 class SupportedDbtAdapters(str, Enum):
     bigquery = 'bigquery'
+    postgres = 'postgres'
     redshift = 'redshift'
     snowflake = 'snowflake'
+    spark = 'spark'
 
 
 # Lookml types
@@ -26,19 +32,84 @@ class LookerAggregateMeasures(str, Enum):
     median = 'median'
     median_distinct = 'median_distinct'
     min = 'min'
-    percentile = 'percentile'
-    percentile_distinct = 'percentile_distinct'
+    # percentile = 'percentile'
+    # percentile_distinct = 'percentile_distinct'
     sum = 'sum'
     sum_distinct = 'sum_distinct'
 
 
+class LookerJoinType(str, Enum):
+    left_outer = 'left_outer'
+    full_outer = 'full_outer'
+    inner = 'inner'
+    cross = 'cross'
+
+
+class LookerJoinRelationship(str, Enum):
+    many_to_one = 'many_to_one'
+    many_to_many = 'many_to_many'
+    one_to_many = 'one_to_many'
+    one_to_one = 'one_to_one'
+
+
+class LookerValueFormatName(str, Enum):
+    decimal_0 = 'decimal_0'
+    decimal_1 = 'decimal_1'
+    decimal_2 = 'decimal_2'
+    decimal_3 = 'decimal_3'
+    decimal_4 = 'decimal_4'
+    usd_0 = 'usd_0'
+    usd = 'usd'
+    gbp_0 = 'gbp_0'
+    gbp = 'gbp'
+    eur_0 = 'eur_0'
+    eur = 'eur'
+    id = 'id'
+    percent_0 = 'percent_0'
+    percent_1 = 'percent_1'
+    percent_2 = 'percent_2'
+    percent_3 = 'percent_3'
+    percent_4 = 'percent_4'
+
+
+class LookerHiddenType(str, Enum):
+    yes = 'yes'
+    no = 'no'
+
+
 class Dbt2LookerMeasure(BaseModel):
-    name: str
     type: LookerAggregateMeasures
+    filters: Optional[List[Dict[str, str]]] = []
+    description: Optional[str]
+    sql: Optional[str]
+    value_format_name: Optional[LookerValueFormatName]
+    group_label: Optional[str]
+    label: Optional[str]
+    hidden: Optional[LookerHiddenType]
+
+    @validator('filters')
+    def filters_are_singular_dicts(cls, v: List[Dict[str, str]]):
+        if v is not None:
+            for f in v:
+                if len(f) != 1:
+                    raise ValueError('Multiple filter names provided for a single filter in measure block')
+        return v
+
+
+class Dbt2LookerDimension(BaseModel):
+    enabled: Optional[bool] = True
+    name: Optional[str]
+    sql: Optional[str]
+    description: Optional[str]
+    value_format_name: Optional[LookerValueFormatName]
 
 
 class Dbt2LookerMeta(BaseModel):
-    measures: Optional[List[Dbt2LookerMeasure]] = []
+    measures: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    measure: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metrics: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    metric: Optional[Dict[str, Dbt2LookerMeasure]] = {}
+    dimension: Optional[Dbt2LookerDimension] = Dbt2LookerDimension()
 
 
 # Looker file types
@@ -57,8 +128,8 @@ class DbtProjectConfig(BaseModel):
     name: str
 
 
-class DbtModelColumnMeta(BaseModel):
-    looker: Optional[Dbt2LookerMeta] = Field(Dbt2LookerMeta(), alias='looker.com')
+class DbtModelColumnMeta(Dbt2LookerMeta):
+    pass
 
 
 class DbtModelColumn(BaseModel):
@@ -73,14 +144,30 @@ class DbtNode(BaseModel):
     resource_type: str
 
 
+class Dbt2LookerExploreJoin(BaseModel):
+    join: str
+    type: Optional[LookerJoinType] = LookerJoinType.left_outer
+    relationship: Optional[LookerJoinRelationship] = LookerJoinRelationship.many_to_one
+    sql_on: str
+
+
+class Dbt2LookerModelMeta(BaseModel):
+    joins: Optional[List[Dbt2LookerExploreJoin]] = []
+
+
+class DbtModelMeta(Dbt2LookerModelMeta):
+    pass
+
+
 class DbtModel(DbtNode):
     resource_type: Literal['model']
-    database: str
+    relation_name: str
     db_schema: str = Field(..., alias='schema')
     name: str
     description: str
     columns: Dict[str, DbtModelColumn]
     tags: List[str]
+    meta: DbtModelMeta
 
     @validator('columns')
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):
@@ -109,7 +196,6 @@ class DbtManifest(BaseModel):
 
 class DbtCatalogNodeMetadata(BaseModel):
     type: str
-    database: str
     db_schema: str = Field(..., alias='schema')
     name: str
     comment: Optional[str]
