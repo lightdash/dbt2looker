@@ -329,11 +329,11 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
     return models.LookViewFile(filename=filename, contents=contents)
 
 
-def lookml_model_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
+def lookml_model_from_dbt_model(model: models.DbtModel, connection_name: str):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
     lookml = {
-        'connection': dbt_project_name,
+        'connection': connection_name,
         'include': '/views/*',
         'explore': {
             'name': model.name,
