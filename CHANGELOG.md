@@ -2,6 +2,22 @@
 
 Recent and upcoming changes to dbt2looker
 
+## 0.11.0
+### Added
+- support label and hidden fields (#49)
+- support non-aggregate measures (#41)
+- support bytes and bignumeric for bigquery (#75)
+- support for custom connection name on the cli (#78)
+
+### Changed
+- updated dependencies (#74)
+
+### Fixed
+- Types maps for redshift (#76)
+
+### Removed
+- Strict manifest validation (#77)
+
 ## 0.10.0
 ### Added
 Support for dbt 1.x
