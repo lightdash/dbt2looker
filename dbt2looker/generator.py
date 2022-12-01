@@ -157,19 +157,19 @@ LOOKER_DTYPE_MAP = {
         # TIME WITH TIME ZONE not supported
     },
     'spark': {
-        'byte':        'number',
-        'short':       'number',
-        'integer':     'number',
-        'long':        'number',
-        'float':       'number',
-        'double':      'number',
-        'decimal':     'number',
-        'string':      'string',
-        'varchar':     'string',
-        'char':        'string',
-        'boolean':     'yesno',
-        'timestamp':   'timestamp',
-        'date':        'datetime',
+        'BYTE':        'number',
+        'SHORT':       'number',
+        'INTEGER':     'number',
+        'LONG':        'number',
+        'FLOAT':       'number',
+        'DOUBLE':      'number',
+        'DECIMAL':     'number',
+        'STRING':      'string',
+        'VARCHAR':     'string',
+        'CHAR':        'string',
+        'BOOLEAN':     'yesno',
+        'TIMESTAMP':   'timestamp',
+        'DATE':        'datetime',
     }
 }
 
@@ -193,7 +193,7 @@ def normalise_spark_types(column_type: str) -> str:
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
-    normalised_column_type = normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type
+    normalised_column_type = (normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type).upper()
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
     if (column_type is not None) and (looker_type is None):
         logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
