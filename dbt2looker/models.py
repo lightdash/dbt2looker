@@ -22,7 +22,9 @@ class SupportedDbtAdapters(str, Enum):
 
 
 # Lookml types
-class LookerAggregateMeasures(str, Enum):
+class LookerMeasureType(str, Enum):
+    number = 'number'
+    string = 'string'
     average = 'average'
     average_distinct = 'average_distinct'
     count = 'count'
@@ -78,7 +80,7 @@ class LookerHiddenType(str, Enum):
 
 
 class Dbt2LookerMeasure(BaseModel):
-    type: LookerAggregateMeasures
+    type: LookerMeasureType
     filters: Optional[List[Dict[str, str]]] = []
     description: Optional[str]
     sql: Optional[str]
