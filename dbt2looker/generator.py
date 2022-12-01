@@ -12,6 +12,7 @@ LOOKER_DTYPE_MAP = {
         'FLOAT':     'number',
         'FLOAT64':   'number',
         'NUMERIC':   'number',
+        'BIGNUMERIC': 'number',
         'BOOLEAN':   'yesno',
         'STRING':    'string',
         'TIMESTAMP': 'timestamp',
@@ -21,6 +22,7 @@ LOOKER_DTYPE_MAP = {
         'BOOL':      'yesno',
         'ARRAY':     'string',
         'GEOGRAPHY': 'string',
+        'BYTES': 'string',
     },
     'snowflake': {
         'NUMBER': 'number',
