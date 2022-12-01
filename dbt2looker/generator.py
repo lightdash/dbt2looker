@@ -155,6 +155,7 @@ LOOKER_DTYPE_MAP = {
         # HLLSKETCH not supported
         'TIME': 'string',
         'TIME WITHOUT TIME ZONE': 'string',
+        'STRING': 'string',
         # TIMETZ not supported
         # TIME WITH TIME ZONE not supported
     },

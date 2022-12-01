@@ -30,8 +30,7 @@ def get_manifest(prefix: str):
     except FileNotFoundError as e:
         logging.error(f'Could not find manifest file at {manifest_path}. Use --target-dir to change the search path for the manifest.json file.')
         raise SystemExit('Failed')
-    parser.validate_manifest(raw_manifest)
-    logging.debug(f'Detected valid manifest at {manifest_path}')
+    logging.debug(f'Detected manifest at {manifest_path}')
     return raw_manifest
 
 
@@ -43,8 +42,7 @@ def get_catalog(prefix: str):
     except FileNotFoundError as e:
         logging.error(f'Could not find catalog file at {catalog_path}. Use --target-dir to change the search path for the catalog.json file.')
         raise SystemExit('Failed')
-    parser.validate_catalog(raw_catalog)
-    logging.debug(f'Detected valid catalog at {catalog_path}')
+    logging.debug(f'Detected catalog at {catalog_path}')
     return raw_catalog
 
 

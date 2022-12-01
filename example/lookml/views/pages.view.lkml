@@ -1,5 +1,5 @@
 view: pages {
-  sql_table_name: alpine-land-278512.dbt.pages ;;
+  sql_table_name: "postgres"."public"."pages" ;;
 
   dimension_group: viewed_at {
     type: time
@@ -60,17 +60,17 @@ view: pages {
   measure: total_page_views {
     type: count
     sql: ${TABLE}.id ;;
-    description: "Count of The primary key for this table"
+    description: "The primary key for this table"
   }
 
   measure: blog_views {
     type: count
     sql: ${TABLE}.id ;;
-    description: "Count of The primary key for this table"
-    group_label: "Blog Info"
+    description: "The primary key for this table"
     filters: [
       path: "/blog%",
     ]
     value_format_name: decimal_0
+    group_label: "Blog Info"
   }
 }
