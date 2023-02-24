@@ -163,16 +163,28 @@ LOOKER_DTYPE_MAP = {
         'BYTE':        'number',
         'SHORT':       'number',
         'INTEGER':     'number',
+        'INT':         'number',
+        'TINYINT':     'number',
+        'SMALLINT':    'number',
+        'BIGINT':      'number',
         'LONG':        'number',
         'FLOAT':       'number',
         'DOUBLE':      'number',
+        'REAL':        'number',
         'DECIMAL':     'number',
+        'DEC':         'number',
+        'NUMERIC':     'number',
         'STRING':      'string',
         'VARCHAR':     'string',
         'CHAR':        'string',
+        'BINARY':      'string',
         'BOOLEAN':     'yesno',
         'TIMESTAMP':   'timestamp',
         'DATE':        'datetime',
+        # ARRAY not supported
+        # STRUCT not supported
+        # INTERVAL <timeframe> not supported
+        # MAP not supported
     }
 }
 
