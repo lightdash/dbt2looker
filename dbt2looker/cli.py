@@ -100,6 +100,11 @@ def run():
         help='DB Connection Name for generated model files',
         type=str,
     )
+    argparser.add_argument(
+        '--view-prefix',
+        help='Prefix to add to view names and filenames',
+        type=str,
+    )
     args = argparser.parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),
@@ -118,8 +123,9 @@ def run():
     adapter_type = parser.parse_adapter_type(raw_manifest)
 
     # Generate lookml views
+    view_prefix = args.view_prefix or ''
     lookml_views = [
-        generator.lookml_view_from_dbt_model(model, adapter_type)
+        generator.lookml_view_from_dbt_model(model, adapter_type, view_prefix)
         for model in typed_dbt_models
     ]
     pathlib.Path(os.path.join(args.output_dir, 'views')).mkdir(parents=True, exist_ok=True)
