@@ -188,6 +188,16 @@ LOOKER_DTYPE_MAP = {
     }
 }
 
+# Databricks is built on the Spark connector and uses the same datatypes
+LOOKER_DTYPE_MAP['databricks'] = LOOKER_DTYPE_MAP['spark']
+
+
+spark_like_adapters = [
+    models.SupportedDbtAdapters.databricks.value,
+    models.SupportedDbtAdapters.spark.value
+]
+
+
 looker_date_time_types = ['datetime', 'timestamp']
 looker_date_types = ['date']
 looker_scalar_types = ['number', 'yesno', 'string']
@@ -208,7 +218,7 @@ def normalise_spark_types(column_type: str) -> str:
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
-    normalised_column_type = (normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type).upper()
+    normalised_column_type = (normalise_spark_types(column_type) if adapter_type in spark_like_adapters else column_type).upper()
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
     if (column_type is not None) and (looker_type is None):
         logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
