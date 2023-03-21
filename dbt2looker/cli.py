@@ -100,6 +100,16 @@ def run():
         help='DB Connection Name for generated model files',
         type=str,
     )
+    argparser.add_argument(
+        '--skip-models',
+        help='Skip model generation step',
+        action='store_true'
+    )
+    argparser.add_argument(
+        '--skip-views',
+        help='Skip view generation step',
+        action='store_true'
+    )
     args = argparser.parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),
@@ -118,26 +128,29 @@ def run():
     adapter_type = parser.parse_adapter_type(raw_manifest)
 
     # Generate lookml views
-    lookml_views = [
-        generator.lookml_view_from_dbt_model(model, adapter_type)
-        for model in typed_dbt_models
-    ]
-    pathlib.Path(os.path.join(args.output_dir, 'views')).mkdir(parents=True, exist_ok=True)
-    for view in lookml_views:
-        with open(os.path.join(args.output_dir, 'views', view.filename), 'w') as f:
-            f.write(view.contents)
+    if (not args.skip_views):
+        lookml_views = [
+            generator.lookml_view_from_dbt_model(model, adapter_type)
+            for model in typed_dbt_models
+        ]
+        pathlib.Path(os.path.join(args.output_dir, 'views')).mkdir(parents=True, exist_ok=True)
+        for view in lookml_views:
+            with open(os.path.join(args.output_dir, 'views', view.filename), 'w') as f:
+                f.write(view.contents)
 
-    logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(args.output_dir, "views")}')
+        logging.info(f'Generated {len(lookml_views)} lookml views in {os.path.join(args.output_dir, "views")}')
 
     # Generate Lookml models
-    connection_name = args.model_connection or dbt_project_config.name
-    lookml_models = [
-        generator.lookml_model_from_dbt_model(model, connection_name)
-        for model in typed_dbt_models
-    ]
-    for model in lookml_models:
-        with open(os.path.join(args.output_dir, model.filename), 'w') as f:
-            f.write(model.contents)
-    
-    logging.info(f'Generated {len(lookml_models)} lookml models in {args.output_dir}')
+    if (not args.skip_models):
+        connection_name = args.model_connection or dbt_project_config.name
+        lookml_models = [
+            generator.lookml_model_from_dbt_model(model, connection_name)
+            for model in typed_dbt_models
+        ]
+        pathlib.Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+        for model in lookml_models:
+            with open(os.path.join(args.output_dir, model.filename), 'w') as f:
+                f.write(model.contents)
+
+        logging.info(f'Generated {len(lookml_models)} lookml models in {args.output_dir}')
     logging.info('Success')
