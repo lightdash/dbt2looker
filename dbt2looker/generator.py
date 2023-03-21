@@ -308,10 +308,10 @@ def lookml_measure(measure_name: str, column: models.DbtModelColumn, measure: mo
     return m
 
 
-def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters):
+def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.SupportedDbtAdapters, view_prefix: str = ''):
     lookml = {
         'view': {
-            'name': model.name,
+            'name': f'{view_prefix}{model.name}',
             'sql_table_name': model.relation_name,
             'dimension_groups': lookml_dimension_groups_from_model(model, adapter_type),
             'dimensions': lookml_dimensions_from_model(model, adapter_type),
@@ -325,7 +325,7 @@ def lookml_view_from_dbt_model(model: models.DbtModel, adapter_type: models.Supp
         len(lookml['view']['dimensions']),
     )
     contents = lkml.dump(lookml)
-    filename = f'{model.name}.view.lkml'
+    filename = f'{view_prefix}{model.name}.view.lkml'
     return models.LookViewFile(filename=filename, contents=contents)
 
 
