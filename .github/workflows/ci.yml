@@ -26,9 +26,8 @@ jobs:
           python -m pip install tox tox-gh-actions
       - name: Test with tox
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          tox -e tests
+          poetry install -v
+          tox -e tests     
       - name: Poetry Version Pull Request
         run: poetry version prepatch
       - name: Poetry Build
