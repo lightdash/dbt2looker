@@ -23,11 +23,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
-      - name: Test with pytest
-        run: |
-          poetry install -v
-          pytest tests     
+          python -m pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox -e tests     
       - name: Poetry Version Pull Request
         run: poetry version prepatch
       - name: Poetry Build
