@@ -1,4 +1,7 @@
 {
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "jira-plugin.workingProject": "",
     "files.associations": {
         "*.yaml": "home-assistant"
