@@ -9,12 +9,15 @@ view: pages {
     timeframes: [
       raw,
       time,
-      hour,
       date,
       week,
+      day_of_week,
       month,
+      month_name,
       quarter,
+      quarter_of_year,
       year,
+      week_of_year,
     ]
   }
 
