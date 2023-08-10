@@ -185,9 +185,13 @@ looker_timeframes = [
     'time',
     'date',
     'week',
+    'day_of_week',
     'month',
+    'month_name',
     'quarter',
+    'quarter_of_year',
     'year',
+    'week_of_year',
 ]
 
 
@@ -210,7 +214,7 @@ def lookml_date_time_dimension_group(column: models.DbtModelColumn, adapter_type
         'sql': column.meta.dimension.sql or f'${{TABLE}}.{column.name}',
         'description': column.meta.dimension.description or column.description,
         'datatype': map_adapter_type_to_looker(adapter_type, column.data_type),
-        'timeframes': ['raw', 'time', 'hour', 'date', 'week', 'month', 'quarter', 'year']
+        'timeframes': looker_timeframes
     }
 
 
