@@ -173,7 +173,29 @@ LOOKER_DTYPE_MAP = {
         'BOOLEAN':     'yesno',
         'TIMESTAMP':   'timestamp',
         'DATE':        'datetime',
-    }
+    },
+    'athena': {
+        'BOOLEAN': 'yesno',
+        'BYTE': 'number',
+        'SHORT': 'number',
+        'TINYINT': 'number',
+        'SMALLINT': 'number',
+        'INT': 'number',
+        'INTEGER': 'number',
+        'BIGINT': 'number',
+        'DOUBLE': 'number',
+        'FLOAT': 'number',
+        'DECIMAL': 'number',
+        'CHAR': 'string',
+        'VARCHAR': 'string',
+        'VARCHAR(29)': 'string',
+        'STRING': 'string',
+        'DATE': 'datetime',
+        'TIMESTAMP': 'timestamp',
+        'ARRAY': 'string',
+        'MAP': 'string',
+        'STRUCT': 'string',
+    },
 }
 
 looker_date_time_types = ['datetime', 'timestamp']
@@ -196,7 +218,7 @@ def normalise_spark_types(column_type: str) -> str:
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
-    normalised_column_type = (normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type).upper()
+    normalised_column_type = (normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type or "").upper()
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
     if (column_type is not None) and (looker_type is None):
         logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
