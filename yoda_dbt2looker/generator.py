@@ -486,7 +486,7 @@ def lookml_model_data_from_dbt_model(
             logging.error(f"Invalid ref {model.meta.looker.main_model}")
 
         lookml = {
-            "connection": dbt_project_name,
+            "connection": model.meta.looker.connection,
             "include": "views/*",
             "explore": {
                 "name": relation_name,
