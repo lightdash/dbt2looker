@@ -277,10 +277,9 @@ def test_main_explorer():
     columns["col_name"].meta.looker.measures = {"one": models.Dbt2LookerMeasure(type = models.LookerAggregateMeasures.average, description="test measure", sql="a=b")}
         
     model_meta = models.DbtModelMeta()
-    model_meta.looker = models.Dbt2MetaLookerModelMeta(main_model = "ref('main_abc')")
+    model_meta.looker = models.Dbt2MetaLookerModelMeta(main_model = "ref('main_abc')" , connection="connection1")
     model_meta.looker.joins = [models.Dbt2LookerExploreJoin(join = "test_join", sql_on="field")]
-    
     model: models.DbtModel = models.DbtModel(unique_id="a", resource_type="model", relation_name="", schema="", name="test", description="", tags=[], columns=columns, meta= model_meta)
     model.name = "test"    
     value = generator.lookml_model_data_from_dbt_model(model, "project")
-    assert value == 'connection: "project"\ninclude: "views/*"\n\nexplore: main_abc {\n  description: ""\n\n  join: test_join {\n    type: left_outer\n    relationship: many_to_one\n    sql_on: field ;;\n  }\n}'
+    assert value == 'connection: "connection1"\ninclude: "views/*"\n\nexplore: main_abc {\n  description: ""\n\n  join: test_join {\n    type: left_outer\n    relationship: many_to_one\n    sql_on: field ;;\n  }\n}'
