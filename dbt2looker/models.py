@@ -19,6 +19,7 @@ class SupportedDbtAdapters(str, Enum):
     redshift = 'redshift'
     snowflake = 'snowflake'
     spark = 'spark'
+    athena = 'athena'
 
 
 # Lookml types

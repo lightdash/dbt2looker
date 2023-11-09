@@ -173,7 +173,28 @@ LOOKER_DTYPE_MAP = {
         'BOOLEAN':     'yesno',
         'TIMESTAMP':   'timestamp',
         'DATE':        'datetime',
-    }
+    },
+    'athena': {
+        'BOOLEAN': 'yesno',
+        'BYTE': 'number',
+        'SHORT': 'number',
+        'TINYINT': 'number',
+        'SMALLINT': 'number',
+        'INT': 'number',
+        'INTEGER': 'number',
+        'BIGINT': 'number',
+        'DOUBLE': 'number',
+        'FLOAT': 'number',
+        'DECIMAL': 'number',
+        'CHAR': 'string',
+        'VARCHAR': 'string',
+        'STRING': 'string',
+        'DATE': 'datetime',
+        'TIMESTAMP': 'timestamp',
+        'ARRAY': 'string',
+        'MAP': 'string',
+        'STRUCT': 'string',
+    },
 }
 
 looker_date_time_types = ['datetime', 'timestamp']
@@ -191,14 +212,21 @@ looker_timeframes = [
 ]
 
 
-def normalise_spark_types(column_type: str) -> str:
-    return re.match(r'^[^\(]*', column_type).group(0)
+def normalise_types(adapter_type: models.SupportedDbtAdapters, column_type: str) -> str:
+    if column_type is None:
+        return ""
+    elif adapter_type == models.SupportedDbtAdapters.spark.value:
+        return re.match(r'^[^\(]*', column_type).group(0)
+    elif adapter_type == models.SupportedDbtAdapters.athena.value:
+        return re.match(r'^[^\(\<]*', column_type).group(0)
+    else:
+        return column_type
 
 
 def map_adapter_type_to_looker(adapter_type: models.SupportedDbtAdapters, column_type: str):
-    normalised_column_type = (normalise_spark_types(column_type) if adapter_type == models.SupportedDbtAdapters.spark.value else column_type).upper()
+    normalised_column_type = normalise_types(adapter_type, column_type).upper()
     looker_type = LOOKER_DTYPE_MAP[adapter_type].get(normalised_column_type)
-    if (column_type is not None) and (looker_type is None):
+    if looker_type is None:
         logging.warning(f'Column type {column_type} not supported for conversion from {adapter_type} to looker. No dimension will be created.')
     return looker_type
 

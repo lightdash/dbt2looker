@@ -11,7 +11,7 @@ Want a deeper integration between dbt and your BI tool? You should also checkout
 * **Dimension groups** for datetime/timestamp/date columns
 * **Measures** defined through dbt column `metadata` [see below](#defining-measures)
 * Looker types
-* Warehouses: BigQuery, Snowflake, Redshift (postgres to come)
+* Warehouses: BigQuery, Snowflake, Redshift, Postgres, Spark, Athena
 
 [![demo](https://raw.githubusercontent.com/hubble-data/dbt2looker/main/docs/demo.gif)](https://asciinema.org/a/407407)
 
@@ -56,7 +56,7 @@ For development, it is recommended to use python 3.7:
 
 ```
 # Ensure you're using 3.7
-poetry env use 3.7  
+poetry env use 3.7
 # alternative: poetry env use /usr/local/opt/python@3.7/bin/python3
 
 # Install dependencies and main package
