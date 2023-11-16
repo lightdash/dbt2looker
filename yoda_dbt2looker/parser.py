@@ -120,7 +120,7 @@ def parse_typed_models(
     )
     exposure_nodes = (
         []
-    )  # [manifest.nodes.get(mode_name) for exposure in typed_dbt_exposures for mode_name in exposure.depends_on.nodes]
+    )
 
     exposure_model_views = set()
     model_to_measure = {}
