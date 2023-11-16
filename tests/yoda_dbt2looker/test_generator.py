@@ -209,77 +209,163 @@ def test__generate_dimensions_column_enabled_col_has_value_format_name(
         call(adapter_type, data_type),
     ]
 
+
 def test__generate_compound_no_primary_key_returns_none():
-   model = MagicMock()
-   model.meta.primary_key = None
-   assert generator._generate_compound_primary_key_if_needed(model) is None
+    model = MagicMock()
+    model.meta.primary_key = None
+    assert generator._generate_compound_primary_key_if_needed(model) is None
+
 
 def test__generate_compound_primary_key_not_compound_return_none():
-   model = MagicMock()
-   model.meta.primary_key = "col1"
-   assert generator._generate_compound_primary_key_if_needed(model) is None
+    model = MagicMock()
+    model.meta.primary_key = "col1"
+    assert generator._generate_compound_primary_key_if_needed(model) is None
+
 
 def test__generate_compound_primary_key_compound_return_dict():
-   model = MagicMock()
-   model.meta.primary_key = "col1 , col2"
-   assert generator._generate_compound_primary_key_if_needed(model)  == {
-            "name": "primary_key",
-            "primary_key": "yes",
-            "sql": 'CONCAT(${TABLE}.col1,${TABLE}.col2) ',
-            "description": f"auto generated compound key from the columns:col1 , col2",
-        }
+    model = MagicMock()
+    model.meta.primary_key = "col1 , col2"
+    assert generator._generate_compound_primary_key_if_needed(model) == {
+        "name": "primary_key",
+        "primary_key": "yes",
+        "sql": "CONCAT(${TABLE}.col1,${TABLE}.col2) ",
+        "description": f"auto generated compound key from the columns:col1 , col2",
+    }
+
 
 @patch("yoda_dbt2looker.generator._generate_compound_primary_key_if_needed")
 @patch("yoda_dbt2looker.generator._generate_dimensions")
-def test_lookml_dimensions_from_model_no_compound_key_return_only_dimensions(generate_dimensions_mock , generate_compound_primary_key_if_needed_mock):
-   dimension1 = MagicMock()
-   generate_dimensions_mock.return_value = [dimension1]
-   generate_compound_primary_key_if_needed_mock.return_value = None
-   model = MagicMock()
-   adapter_type = MagicMock()
-   assert generator.lookml_dimensions_from_model(model , adapter_type) == [dimension1] 
-   assert generate_dimensions_mock.mock_calls == [call(model , adapter_type)]
-   assert generate_compound_primary_key_if_needed_mock.mock_calls == [call(model)]
+def test_lookml_dimensions_from_model_no_compound_key_return_only_dimensions(
+    generate_dimensions_mock, generate_compound_primary_key_if_needed_mock
+):
+    dimension1 = MagicMock()
+    generate_dimensions_mock.return_value = [dimension1]
+    generate_compound_primary_key_if_needed_mock.return_value = None
+    model = MagicMock()
+    adapter_type = MagicMock()
+    assert generator.lookml_dimensions_from_model(model, adapter_type) == [dimension1]
+    assert generate_dimensions_mock.mock_calls == [call(model, adapter_type)]
+    assert generate_compound_primary_key_if_needed_mock.mock_calls == [call(model)]
+
 
 @patch("yoda_dbt2looker.generator._generate_compound_primary_key_if_needed")
 @patch("yoda_dbt2looker.generator._generate_dimensions")
-def test_lookml_dimensions_from_model_has_compound_key_return_joined_list(generate_dimensions_mock , generate_compound_primary_key_if_needed_mock):
-   dimension1 = MagicMock()
-   dimension2 = MagicMock()
-   generate_dimensions_mock.return_value = [dimension1]
-   generate_compound_primary_key_if_needed_mock.return_value = dimension2
-   model = MagicMock()
-   adapter_type = MagicMock()
-   assert generator.lookml_dimensions_from_model(model , adapter_type) == [dimension1 , dimension2] 
-   assert generate_dimensions_mock.mock_calls == [call(model , adapter_type)]
-   assert generate_compound_primary_key_if_needed_mock.mock_calls[0] == call(model) 
+def test_lookml_dimensions_from_model_has_compound_key_return_joined_list(
+    generate_dimensions_mock, generate_compound_primary_key_if_needed_mock
+):
+    dimension1 = MagicMock()
+    dimension2 = MagicMock()
+    generate_dimensions_mock.return_value = [dimension1]
+    generate_compound_primary_key_if_needed_mock.return_value = dimension2
+    model = MagicMock()
+    adapter_type = MagicMock()
+    assert generator.lookml_dimensions_from_model(model, adapter_type) == [
+        dimension1,
+        dimension2,
+    ]
+    assert generate_dimensions_mock.mock_calls == [call(model, adapter_type)]
+    assert generate_compound_primary_key_if_needed_mock.mock_calls[0] == call(model)
 
-def test_looker_inner_on_column_meta():
+
+@patch("yoda_dbt2looker.generator.lookml_non_aggregative_measure")
+def test_looker_inner_on_column_meta(lookml_non_aggregative_measure_mock):
+    lookml_non_aggregative_measure_mock.return_value = {"name": "measure_1"}
     columns = dict()
-    columns["col_name"] = models.DbtModelColumn(name="test", description="", meta=models.DbtModelColumnMeta())
+    columns["col_name"] = models.DbtModelColumn(
+        name="test", description="", meta=models.DbtModelColumnMeta()
+    )
     columns["col_name"].meta.looker = models.Dbt2InnerLookerMeta()
-    
+
     columns["col_name"].meta.looker.measures = {}
-    columns["col_name"].meta.looker.measures["one"] = models.Dbt2LookerMeasure(type = models.LookerAggregateMeasures.average, description="test measure", sql="a=b")
-        
+    columns["col_name"].meta.looker.measures["one"] = models.Dbt2LookerMeasure(
+        type=models.LookerAggregateMeasures.average,
+        description="test measure",
+        sql="a=b",
+    )
+    measure1 = models.Dbt2LookerExploreMeasure(
+        name="measure_1",
+        model="ref('a')",
+        sql="(SUM(${ref('model_2').interacted_users}) / SUM(${ref('a').total_users})",
+        description="measure_description",
+        type=models.LookerNoneAggregateMeasures.number.value,
+    )
     model_meta = models.DbtModelMeta()
-    model: models.DbtModel = models.DbtModel(unique_id="a", resource_type="model", relation_name="", schema="", name="test", description="", tags=[], columns=columns, meta= model_meta)
-    model.name = "test"    
+    model: models.DbtModel = models.DbtModel(
+        unique_id="a",
+        resource_type="model",
+        relation_name="",
+        schema="",
+        name="test",
+        description="",
+        tags=[],
+        columns=columns,
+        meta=model_meta,
+        none_aggregative_exposure=[measure1],
+    )
+    model.name = "test"
 
     value = generator.lookml_measures_from_model(model)
-    assert value == [{'name': 'one', 'type': 'average', 'description': 'test measure', 'sql': 'a=b'}, {'name': 'count', 'type': 'count', 'description': 'Default count measure'}]
+    assert value == [
+        {"name": "one", "type": "average", "description": "test measure", "sql": "a=b"},
+        {"name": "measure_1"},
+        {"name": "count", "type": "count", "description": "Default count measure"},
+    ]
+    assert lookml_non_aggregative_measure_mock.mock_calls == [call(measure1)]
+
 
 def test_main_explorer():
     columns = dict()
-    columns["col_name"] = models.DbtModelColumn(name="test", description="", meta=models.DbtModelColumnMeta())
+    columns["col_name"] = models.DbtModelColumn(
+        name="test", description="", meta=models.DbtModelColumnMeta()
+    )
     columns["col_name"].meta.looker = models.Dbt2InnerLookerMeta()
-    
-    columns["col_name"].meta.looker.measures = {"one": models.Dbt2LookerMeasure(type = models.LookerAggregateMeasures.average, description="test measure", sql="a=b")}
-        
+
+    columns["col_name"].meta.looker.measures = {
+        "one": models.Dbt2LookerMeasure(
+            type=models.LookerAggregateMeasures.average,
+            description="test measure",
+            sql="a=b",
+        )
+    }
+
     model_meta = models.DbtModelMeta()
-    model_meta.looker = models.Dbt2MetaLookerModelMeta(main_model = "ref('main_abc')" , connection="connection1")
-    model_meta.looker.joins = [models.Dbt2LookerExploreJoin(join = "test_join", sql_on="field")]
-    model: models.DbtModel = models.DbtModel(unique_id="a", resource_type="model", relation_name="", schema="", name="test", description="", tags=[], columns=columns, meta= model_meta)
-    model.name = "test"    
+    model_meta.looker = models.Dbt2MetaLookerModelMeta(
+        main_model="ref('main_abc')", connection="connection1"
+    )
+    model_meta.looker.joins = [
+        models.Dbt2LookerExploreJoin(join="test_join", sql_on="field")
+    ]
+    model: models.DbtModel = models.DbtModel(
+        unique_id="a",
+        resource_type="model",
+        relation_name="",
+        schema="",
+        name="test",
+        description="",
+        tags=[],
+        columns=columns,
+        meta=model_meta,
+    )
+    model.name = "test"
     value = generator.lookml_model_data_from_dbt_model(model, "project")
-    assert value == 'connection: "connection1"\ninclude: "views/*"\n\nexplore: main_abc {\n  description: ""\n\n  join: test_join {\n    type: left_outer\n    relationship: many_to_one\n    sql_on: field ;;\n  }\n}'
+    assert (
+        value
+        == 'connection: "connection1"\ninclude: "views/*"\n\nexplore: main_abc {\n  description: ""\n\n  join: test_join {\n    type: left_outer\n    relationship: many_to_one\n    sql_on: field ;;\n  }\n}'
+    )
+
+
+def test_lookml_non_aggregative_measure():
+    measure1 = models.Dbt2LookerExploreMeasure(
+        name="measure_1",
+        model="ref('model_1')",
+        sql="(SUM(${ref('model_2').interacted_users}) / SUM(${ref('model_1').total_users})",
+        description="measure_description",
+        type=models.LookerNoneAggregateMeasures.number.value,
+    )
+    value = generator.lookml_non_aggregative_measure(measure1)
+    assert value == {
+        "name": "measure_1",
+        "type": "number",
+        "sql": "(SUM(${model_2.interacted_users} )/SUM( ${model_1.total_users})",
+        "description": "measure_description",
+    }

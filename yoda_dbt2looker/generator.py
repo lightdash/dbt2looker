@@ -347,6 +347,10 @@ def lookml_measures_from_model(model: models.DbtModel):
             **column.meta.metric,
         }.items()
     ]
+    for measure in model.none_aggregative_exposure:
+        measures.append(
+            lookml_non_aggregative_measure(measure)
+        )
     measures.append(
         lookml_measure(
             measure_name="count",
@@ -384,6 +388,17 @@ def lookml_measure(
     return m
 
 
+def lookml_non_aggregative_measure(
+    measure: models.Dbt2LookerExploreMeasure
+):
+    return {
+        "name": measure.name,
+        "description": measure.description,
+        "type": measure.type.value,
+        "sql": _convert_all_refs_to_relation_name(measure.sql),
+    }
+
+
 def lookml_view_from_dbt_model(
     model: models.DbtModel, adapter_type: models.SupportedDbtAdapters
 ):
@@ -402,7 +417,11 @@ def lookml_view_from_dbt_model(
         len(lookml["view"]["measures"]),
         len(lookml["view"]["dimensions"]),
     )
-    contents = lkml.dump(lookml)
+    try:
+        contents = lkml.dump(lookml)
+    except Exception as e:
+        logging.error(f"Error dumping lookml for model {model.name}")
+        raise e
     filename = f"{model.name}.view.lkml"
     return models.LookViewFile(filename=filename, contents=contents)
 
@@ -456,9 +475,7 @@ def _extract_all_refs(ref_str: str) -> list[str]:
     return refs
 
 
-def lookml_model_data_from_dbt_model(
-    model: models.DbtModel, dbt_project_name: str
-):
+def lookml_model_data_from_dbt_model(model: models.DbtModel, dbt_project_name: str):
     # Note: assumes view names = model names
     #       and models are unique across dbt packages in project
     lookml = {
@@ -479,9 +496,7 @@ def lookml_model_data_from_dbt_model(
         },
     }
     if model.meta.looker:
-        relation_name = _convert_all_refs_to_relation_name(
-            model.meta.looker.main_model
-        )
+        relation_name = _convert_all_refs_to_relation_name(model.meta.looker.main_model)
         if not relation_name:
             logging.error(f"Invalid ref {model.meta.looker.main_model}")
 
@@ -503,7 +518,8 @@ def lookml_model_data_from_dbt_model(
             },
         }
     return lkml.dump(lookml)
-    
+
+
 def lookml_model_from_dbt_model(
     manifest: models.DbtManifest, model: models.DbtModel, dbt_project_name: str
 ):
@@ -511,5 +527,5 @@ def lookml_model_from_dbt_model(
     model_loopup = f"exposure.{dbt_project_name}.{model.name}"
     exposure_node = manifest.exposures.get(model_loopup)
     file_name = Path(exposure_node.original_file_path).stem
-    filename = f"{file_name}.model.lkml"    
+    filename = f"{file_name}.model.lkml"
     return models.LookModelFile(filename=filename, contents=contents)
