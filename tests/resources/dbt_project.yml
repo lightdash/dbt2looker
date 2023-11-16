@@ -1,0 +1,154 @@
+analysis-paths:
+- analyses
+clean-targets:
+- target
+- dbt_modules
+- dbt_packages
+config-version: 2
+dispatch:
+- macro_namespace: spark_utils
+  search_order:
+  - yoda
+  - spark_utils
+- macro_namespace: dbt_utils
+  search_order:
+  - yoda
+  - spark_utils
+  - dbt_utils
+docs-paths:
+- docs
+- models
+macro-paths:
+- macros
+model-paths:
+- models
+models:
+  +on_schema_change: append_new_columns
+  +quote_columns: true
+  yoda:
+    +file_format: delta
+    +post-hook: '{{ dbt_data_applications.recreate_cicd_views() }}'
+    analytics:
+      +tags: analytics
+      cs:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      delivery:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      email:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      finance:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      gtm:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      loyalty:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      marketing:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      new_revenue:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      partners:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      platform:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      salesforce:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      sms:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      subscriptions:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      synergies:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      ugc:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+      utils:
+        +tags: analytics
+        marts:
+          +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    communication:
+      +tags: communication
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    email:
+      +tags: email
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    infra:
+      +tags: infra
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    loyalty:
+      +tags: loyalty
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    north_bound:
+      +tags: north_bound
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    platform:
+      +tags: platform
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    sms:
+      +tags: sms
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    source: null
+    staging: null
+    subscriptions:
+      +tags: subscriptions
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    support:
+      +tags: support
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+    ugc:
+      +tags: ugc
+      marts:
+        +materialized: '{{ ''table'' if target.name == ''prod'' else ''view'' }}'
+name: yoda
+profile: default
+seed-paths:
+- data
+- unit_test_mocks
+seeds:
+  +file_format: delta
+snapshot-paths:
+- snapshots
+target-path: target
+test-paths:
+- tests
+vars:
+  dbt_command: '{{ env_var(''CURRENT_DBT_COMMAND'') }}'
+  dbt_materialize_table: 'False'
+version: 2.0.0

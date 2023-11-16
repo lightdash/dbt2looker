@@ -39,6 +39,13 @@ class LookerAggregateMeasures(str, Enum):
     sum_distinct = "sum_distinct"
 
 
+class LookerNoneAggregateMeasures(str, Enum):
+    number = "number"
+    date = "date"
+    yesno = "yesno"
+    string = "string"
+
+
 class LookerJoinType(str, Enum):
     left_outer = "left_outer"
     full_outer = "full_outer"
@@ -155,10 +162,19 @@ class Dbt2LookerExploreJoin(BaseModel):
     sql_on: str
 
 
+class Dbt2LookerExploreMeasure(BaseModel):
+    name: str
+    model: str
+    type: LookerNoneAggregateMeasures
+    sql: str
+    description: Optional[str] = ""
+
+
 class Dbt2MetaLookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
     main_model: str
     connection: str
+    measures: Optional[List[Dbt2LookerExploreMeasure]] = []
 
 
 class Dbt2LookerModelMeta(BaseModel):
@@ -180,6 +196,7 @@ class DbtModel(DbtNode):
     tags: List[str]
     meta: DbtModelMeta
     create_explorer: bool = True
+    none_aggregative_exposure: Optional[List[Dbt2LookerExploreMeasure]] = []
 
     @validator("columns")
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):
