@@ -424,7 +424,7 @@ def lookml_view_from_dbt_model(
 
 def _get_model_relation_name(model: models.DbtModel):
     if "yoda_snowflake" in model.tags:
-        return f"{model.meta.integration_config.snowflake.properties.schema}.{model.meta.integration_config.snowflake.properties.table}"
+        return f"{model.meta.integration_config.snowflake.properties.sf_schema}.{model.meta.integration_config.snowflake.properties.table}"
     return model.relation_name
 
 

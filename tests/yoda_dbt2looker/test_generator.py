@@ -371,8 +371,11 @@ def test_lookml_non_aggregative_measure():
     }
 
 
-
 def test__get_model_relation_name():
     model = MagicMock()
     model.relation_name = "table1"
-    assert generator._get_model_relation_name(model) == "unique_id"
+    assert generator._get_model_relation_name(model) == "table1"
+    model.tags = ["yoda_snowflake"]
+    model.meta.integration_config.snowflake.properties.sf_schema = "schema1"
+    model.meta.integration_config.snowflake.properties.table = "table2"
+    assert generator._get_model_relation_name(model) == "schema1.table2"

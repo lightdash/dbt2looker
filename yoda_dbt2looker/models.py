@@ -183,8 +183,8 @@ class Dbt2LookerModelMeta(BaseModel):
 
 
 class SnowflakeProperties(BaseModel):
-    table: str = Field(None, alias="table")
-    schema: str = Field(None, alias="schema")
+    table: str
+    sf_schema: str = Field(None, alias="schema")
 
 
 class SnowflakeConfiguration(BaseModel):
