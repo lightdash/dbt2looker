@@ -369,3 +369,10 @@ def test_lookml_non_aggregative_measure():
         "sql": "(SUM(${model_2.interacted_users} )/SUM( ${model_1.total_users})",
         "description": "measure_description",
     }
+
+
+
+def test__get_model_relation_name():
+    model = MagicMock()
+    model.relation_name = "table1"
+    assert generator._get_model_relation_name(model) == "unique_id"

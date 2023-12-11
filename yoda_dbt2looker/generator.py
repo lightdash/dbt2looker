@@ -348,9 +348,7 @@ def lookml_measures_from_model(model: models.DbtModel):
         }.items()
     ]
     for measure in model.none_aggregative_exposure:
-        measures.append(
-            lookml_non_aggregative_measure(measure)
-        )
+        measures.append(lookml_non_aggregative_measure(measure))
     measures.append(
         lookml_measure(
             measure_name="count",
@@ -388,9 +386,7 @@ def lookml_measure(
     return m
 
 
-def lookml_non_aggregative_measure(
-    measure: models.Dbt2LookerExploreMeasure
-):
+def lookml_non_aggregative_measure(measure: models.Dbt2LookerExploreMeasure):
     return {
         "name": measure.name,
         "description": measure.description,
@@ -405,7 +401,7 @@ def lookml_view_from_dbt_model(
     lookml = {
         "view": {
             "name": model.name,
-            "sql_table_name": model.relation_name,
+            "sql_table_name": _get_model_relation_name(model),
             "dimension_groups": lookml_dimension_groups_from_model(model, adapter_type),
             "dimensions": lookml_dimensions_from_model(model, adapter_type),
             "measures": lookml_measures_from_model(model),
@@ -424,6 +420,12 @@ def lookml_view_from_dbt_model(
         raise e
     filename = f"{model.name}.view.lkml"
     return models.LookViewFile(filename=filename, contents=contents)
+
+
+def _get_model_relation_name(model: models.DbtModel):
+    if "yoda_snowflake" in model.tags:
+        return f"{model.meta.integration_config.snowflake.properties.schema}.{model.meta.integration_config.snowflake.properties.table}"
+    return model.relation_name
 
 
 def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str):

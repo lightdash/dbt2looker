@@ -182,8 +182,22 @@ class Dbt2LookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
 
 
+class SnowflakeProperties(BaseModel):
+    table: str = Field(None, alias="table")
+    schema: str = Field(None, alias="schema")
+
+
+class SnowflakeConfiguration(BaseModel):
+    properties: SnowflakeProperties = None
+
+
+class ModelIntegrationConfigMetadata(BaseModel):
+    snowflake: Optional[SnowflakeConfiguration] = None
+
+
 class DbtModelMeta(Dbt2LookerModelMeta):
     primary_key: Optional[str] = Field(None, alias="primary-key")
+    integration_config: Optional[ModelIntegrationConfigMetadata] = None
 
 
 class DbtModel(DbtNode):
