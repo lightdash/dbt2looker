@@ -170,11 +170,20 @@ class Dbt2LookerExploreMeasure(BaseModel):
     description: Optional[str] = ""
 
 
+class Dbt2LookerExploreDimension(BaseModel):
+    name: str
+    model: str
+    type: str
+    sql: str
+    description: Optional[str] = ""
+
+
 class Dbt2MetaLookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
     main_model: str
     connection: str
     measures: Optional[List[Dbt2LookerExploreMeasure]] = []
+    dimensions: Optional[List[Dbt2LookerExploreDimension]] = []
 
 
 class Dbt2LookerModelMeta(BaseModel):
@@ -211,6 +220,7 @@ class DbtModel(DbtNode):
     meta: DbtModelMeta
     create_explorer: bool = True
     none_aggregative_exposure: Optional[List[Dbt2LookerExploreMeasure]] = []
+    calculated_dimension: Optional[List[Dbt2LookerExploreDimension]] = []
 
     @validator("columns")
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):

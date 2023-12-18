@@ -270,6 +270,8 @@ def lookml_dimensions_from_model(
 ):
     compound_key = _generate_compound_primary_key_if_needed(model)
     dimensions = _generate_dimensions(model, adapter_type)
+    for calculated_dimension in model.calculated_dimension:
+        dimensions.append(lookml_calculated_dimension(calculated_dimension))
     if compound_key:
         return dimensions + [compound_key]
     return dimensions
@@ -392,6 +394,15 @@ def lookml_non_aggregative_measure(measure: models.Dbt2LookerExploreMeasure):
         "description": measure.description,
         "type": measure.type.value,
         "sql": _convert_all_refs_to_relation_name(measure.sql),
+    }
+
+
+def lookml_calculated_dimension(dimension: models.Dbt2LookerExploreDimension):
+    return {
+        "name": dimension.name,
+        "description": dimension.description,
+        "type": dimension.type,
+        "sql": dimension.sql,
     }
 
 

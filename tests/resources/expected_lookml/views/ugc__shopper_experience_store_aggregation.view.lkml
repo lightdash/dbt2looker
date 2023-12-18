@@ -66,6 +66,12 @@ view: ugc__shopper_experience_store_aggregation {
     description: "Amount of unique users that did not interact with any widget and did not place any order"
   }
 
+  dimension: custom_dimension {
+    description: ""
+    type: number
+    sql: case when ${currency} is not null then ${orders_count} else 0 end ;;
+  }
+
   measure: engagement {
     description: ""
     type: number
