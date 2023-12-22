@@ -251,6 +251,7 @@ class Dbt2MetaLookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
     main_model: str
     connection: str
+    sql_always_where: Optional[str] = None
     measures: Optional[List[Dbt2LookerExploreMeasure]] = []
     dimensions: Optional[List[Dbt2LookerExploreDimension]] = []
     dimension_groups: Optional[List[Dbt2LookerExploreDimensionGroupDuration]] = []

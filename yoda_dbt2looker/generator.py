@@ -615,6 +615,10 @@ def lookml_model_data_from_dbt_model(model: models.DbtModel, dbt_project_name: s
                 ],
             },
         }
+
+    if model.meta.looker.sql_always_where:
+        lookml["explore"]["sql_always_where"] = model.meta.looker.sql_always_where
+
     return lkml.dump(lookml)
 
 
