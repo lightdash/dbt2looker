@@ -23,6 +23,7 @@ view: ugc__shopper_experience_store_aggregation {
     sql_start: {% date_start date_range_filter %} ;;
     sql_end: {% date_end date_range_filter %} ;;
     description: ""
+    intervals: [day]
   }
 
   dimension: app_key {

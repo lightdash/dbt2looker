@@ -396,3 +396,107 @@ def test_lookml_calculated_dimension():
         "sql": "case when 1=1 then 1 else 0 end",
         "description": "custom dimension",
     }
+
+
+def test_lookml_parameter_exposure():
+    parameter1 = models.Dbt2LookerExploreParameter(
+        name="custom_parameter_1",
+        model="ref('model_1')",
+        type="number",
+        label="Param1",
+        allowed_value=["1", "2", "3"],
+        description="custom parameter",
+    )
+
+    parameter2 = models.Dbt2LookerExploreParameter(
+        name="custom_parameter_2",
+        model="ref('model_1')",
+        type="string",
+    )
+    value1 = generator.lookml_parameter_exposure(parameter1)
+    value2 = generator.lookml_parameter_exposure(parameter2)
+    assert value1 == {
+        "name": "custom_parameter_1",
+        "type": "number",
+        "label": "Param1",
+        "allowed_value": ["1", "2", "3"],
+        "description": "custom parameter",
+    }
+
+    assert value2 == {
+        "name": "custom_parameter_2",
+        "type": "string",
+        "description": "",
+    }
+
+
+def test_lookml_filter_exposure():
+    filter1 = models.Dbt2LookerExploreFilter(
+        name="custom_filter_1",
+        model="ref('model_1')",
+        type="number",
+        label="Filter1",
+        sql="case when 1=1 then 1 else 0 end",
+        description="custom filter",
+    )
+
+    filter2 = models.Dbt2LookerExploreFilter(
+        name="custom_filter_2",
+        model="ref('model_1')",
+        type="date",
+    )
+    value1 = generator.lookml_filter_exposure(filter1)
+    value2 = generator.lookml_filter_exposure(filter2)
+    assert value1 == {
+        "name": "custom_filter_1",
+        "type": "number",
+        "label": "Filter1",
+        "sql": "case when 1=1 then 1 else 0 end",
+        "description": "custom filter",
+    }
+
+    assert value2 == {
+        "name": "custom_filter_2",
+        "type": "date",
+        "description": "",
+    }
+
+
+def test_lookml_exposure_dimension_duration_group():
+    dim_group1 = models.Dbt2LookerExploreDimensionGroupDuration(
+        name="dim_group_1",
+        model="ref('model_1')",
+        type="duration",
+        sql_start="case when 1=1 then 1 else 0 end",
+        sql_end="case when 1=1 then 1 else 0 end",
+        intervals=["day"],
+        datatype="date",
+        description="custom dimension group",
+    )
+
+    dim_group2 = models.Dbt2LookerExploreDimensionGroupDuration(
+        name="dim_group_2",
+        model="ref('model_1')",
+        type="duration",
+        sql_start="case when 1=1 then 1 else 0 end",
+        sql_end="case when 1=1 then 1 else 0 end",
+    )
+    value1 = generator.lookml_exposure_dimension_duration_group(dim_group1)
+    value2 = generator.lookml_exposure_dimension_duration_group(dim_group2)
+    assert value1 == {
+        "name": "dim_group_1",
+        "type": "duration",
+        "sql_start": "case when 1=1 then 1 else 0 end",
+        "sql_end": "case when 1=1 then 1 else 0 end",
+        "description": "custom dimension group",
+        "datatype": "date",
+        "intervals": ["day"],
+    }
+
+    assert value2 == {
+        "name": "dim_group_2",
+        "type": "duration",
+        "sql_start": "case when 1=1 then 1 else 0 end",
+        "sql_end": "case when 1=1 then 1 else 0 end",
+        "description": "",
+    }

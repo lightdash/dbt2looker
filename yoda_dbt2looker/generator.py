@@ -476,10 +476,10 @@ def lookml_exposure_dimension_duration_group(
     }
 
     if dimension_group.datatype:
-        d["datatype"]: dimension_group.datatype
+        d["datatype"] = dimension_group.datatype
 
     if dimension_group.intervals:
-        d["intervals"]: dimension_group.intervals
+        d["intervals"] = dimension_group.intervals
 
     return d
 
