@@ -262,7 +262,14 @@ def lookml_dimension_groups_from_model(
         and map_adapter_type_to_looker(adapter_type, column.data_type)
         in looker_date_types
     ]
-    return date_times + dates
+
+    exposure_dimension_groups = []
+
+    for exposure_dimension_group in model.dimension_groups_exposure:
+        exposure_dimension_groups.append(
+            lookml_exposure_dimension_duration_group(exposure_dimension_group)
+        )
+    return date_times + dates + exposure_dimension_groups
 
 
 def lookml_dimensions_from_model(
@@ -275,6 +282,20 @@ def lookml_dimensions_from_model(
     if compound_key:
         return dimensions + [compound_key]
     return dimensions
+
+
+def lookml_parameters_from_model(model: models.DbtModel):
+    parameters = []
+    for parameter_exposure in model.parameters_exposure:
+        parameters.append(lookml_parameter_exposure(parameter_exposure))
+    return parameters
+
+
+def lookml_filters_from_model(model: models.DbtModel):
+    filters = []
+    for filter_exposure in model.filters_exposure:
+        filters.append(lookml_filter_exposure(filter_exposure))
+    return filters
 
 
 def _generate_dimensions(model, adapter_type):
@@ -398,12 +419,69 @@ def lookml_non_aggregative_measure(measure: models.Dbt2LookerExploreMeasure):
 
 
 def lookml_calculated_dimension(dimension: models.Dbt2LookerExploreDimension):
-    return {
+    d = {
         "name": dimension.name,
         "description": dimension.description,
-        "type": dimension.type,
+        "type": dimension.type.value,
         "sql": dimension.sql,
     }
+
+    if dimension.hidden:
+        d["hidden"] = dimension.hidden
+
+    return d
+
+
+def lookml_parameter_exposure(exposure_parameter: models.Dbt2LookerExploreParameter):
+    d = {
+        "name": exposure_parameter.name,
+        "type": exposure_parameter.type.value,
+        "description": exposure_parameter.description,
+    }
+
+    if exposure_parameter.allowed_value:
+        d["allowed_value"] = exposure_parameter.allowed_value
+
+    if exposure_parameter.label:
+        d["label"] = exposure_parameter.label
+
+    return d
+
+
+def lookml_filter_exposure(exposure_filter: models.Dbt2LookerExploreFilter):
+    d = {
+        "name": exposure_filter.name,
+        "description": exposure_filter.description,
+        "type": exposure_filter.type.value,
+    }
+
+    if exposure_filter.sql:
+        d["sql"] = exposure_filter.sql
+
+    if exposure_filter.label:
+        d["label"] = exposure_filter.label
+
+    return d
+
+
+def lookml_exposure_dimension_duration_group(
+    dimension_group: models.Dbt2LookerExploreDimensionGroupDuration,
+):
+    d = {
+        "name": dimension_group.name,
+        "type": dimension_group.type.value,
+        "sql_start": dimension_group.sql_start,
+        "sql_end": dimension_group.sql_end,
+        "description": dimension_group.description,
+    }
+
+    if dimension_group.datatype:
+        d["datatype"]: dimension_group.datatype
+
+    if dimension_group.intervals:
+        d["intervals"]: dimension_group.intervals
+
+    return d
 
 
 def lookml_view_from_dbt_model(
@@ -418,6 +496,13 @@ def lookml_view_from_dbt_model(
             "measures": lookml_measures_from_model(model),
         }
     }
+    parameters = lookml_parameters_from_model(model)
+    filters = lookml_filters_from_model(model)
+    if parameters:
+        lookml["view"]["parameters"] = parameters
+    if filters:
+        lookml["view"]["filters"] = filters
+
     logging.debug(
         f"Created view from model %s with %d measures, %d dimensions",
         model.name,
