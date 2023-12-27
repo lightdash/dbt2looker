@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 from yoda_dbt2looker import models
 from yoda_dbt2looker.parser import (
     _extract_measures_models,
-    _extract_models,
+    _extract_exposure_models,
 )
 
 
@@ -54,7 +54,7 @@ def test__extract_models():
             type="string",
         ),
     ]
-    _extract_models(exposure_model_views, model, exposure.meta.looker.dimensions)
+    _extract_exposure_models(exposure_model_views, model, exposure.meta.looker.dimensions)
     assert exposure_model_views == {"model_1", "model_2"}
     assert model == {
         "model_1": [exposure.meta.looker.dimensions[0]],

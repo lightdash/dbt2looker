@@ -481,8 +481,8 @@ def test_lookml_exposure_dimension_duration_group():
         sql_start="case when 1=1 then 1 else 0 end",
         sql_end="case when 1=1 then 1 else 0 end",
     )
-    value1 = generator.lookml_exposure_dimension_duration_group(dim_group1)
-    value2 = generator.lookml_exposure_dimension_duration_group(dim_group2)
+    value1 = generator.lookml_exposure_dimension_group_duration(dim_group1)
+    value2 = generator.lookml_exposure_dimension_group_duration(dim_group2)
     assert value1 == {
         "name": "dim_group_1",
         "type": "duration",

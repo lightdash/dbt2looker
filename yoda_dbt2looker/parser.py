@@ -156,14 +156,16 @@ def parse_typed_models(
             ):
                 exposure_model_views.add(item)
         _extract_measures_models(exposure_model_views, model_to_measure, exposure)
-        _extract_models(
+        _extract_exposure_models(
             exposure_model_views, calculated_dimension, exposure.meta.looker.dimensions
         )
-        _extract_models(
+        _extract_exposure_models(
             exposure_model_views, parameters, exposure.meta.looker.parameters
         )
-        _extract_models(exposure_model_views, filters, exposure.meta.looker.filters)
-        _extract_models(
+        _extract_exposure_models(
+            exposure_model_views, filters, exposure.meta.looker.filters
+        )
+        _extract_exposure_models(
             exposure_model_views,
             dimension_groups,
             exposure.meta.looker.dimension_groups,
@@ -271,9 +273,9 @@ def _extract_measures_models(
             exposure_model_views.update(_extract_all_refs(measure.sql))
 
 
-def _extract_models(
+def _extract_exposure_models(
     exposure_model_views: set[str],
-    model: dict[str, list[BaseModel]],
+    exposure_model: dict[str, list[BaseModel]],
     looker_exposure_objects: Optional[List[BaseModel]],
 ):
     if looker_exposure_objects:
@@ -287,9 +289,9 @@ def _extract_models(
                 )
             main_model = _extract_all_refs(looker_exposure_object.model)[0]
             exposure_model_views.add(main_model)
-            if not model.get(main_model):
-                model[main_model] = []
-            model[main_model].append(looker_exposure_object)
+            if not exposure_model.get(main_model):
+                exposure_model[main_model] = []
+            exposure_model[main_model].append(looker_exposure_object)
 
 
 def get_column_type_from_catalog(
