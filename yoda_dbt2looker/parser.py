@@ -5,6 +5,8 @@ import importlib.resources
 from typing import Dict, Optional, List, Union
 from functools import reduce
 
+from pydantic.main import BaseModel
+
 from .generator import _extract_all_refs
 from . import models
 
@@ -89,6 +91,7 @@ def parse_exposures(raw_manifest: dict, tag=None) -> List[models.DbtExposure]:
                 'Cannot parse exposure with id: "%s" - is the exposure file empty?',
                 exposure.unique_id,
             )
+            logging.error(exposure.resource_type)
             raise SystemExit("Failed")
 
     if tag is None:
@@ -123,6 +126,9 @@ def parse_typed_models(
     exposure_model_views = set()
     model_to_measure = {}
     calculated_dimension = {}
+    dimension_groups = {}
+    parameters = {}
+    filters = {}
     for exposure in typed_dbt_exposures:
         ref_model = _extract_all_refs(exposure.meta.looker.main_model)
         if not ref_model:
@@ -150,8 +156,19 @@ def parse_typed_models(
             ):
                 exposure_model_views.add(item)
         _extract_measures_models(exposure_model_views, model_to_measure, exposure)
-        _extract_calculated_dimensions_models(
-            exposure_model_views, calculated_dimension, exposure
+        _extract_exposure_models(
+            exposure_model_views, calculated_dimension, exposure.meta.looker.dimensions
+        )
+        _extract_exposure_models(
+            exposure_model_views, parameters, exposure.meta.looker.parameters
+        )
+        _extract_exposure_models(
+            exposure_model_views, filters, exposure.meta.looker.filters
+        )
+        _extract_exposure_models(
+            exposure_model_views,
+            dimension_groups,
+            exposure.meta.looker.dimension_groups,
         )
 
     for model in exposure_model_views:
@@ -165,6 +182,12 @@ def parse_typed_models(
             model_node.none_aggregative_exposure = model_to_measure[model]
         if model in calculated_dimension:
             model_node.calculated_dimension = calculated_dimension[model]
+        if model in dimension_groups:
+            model_node.dimension_groups_exposure = dimension_groups[model]
+        if model in parameters:
+            model_node.parameters_exposure = parameters[model]
+        if model in filters:
+            model_node.filters_exposure = filters[model]
         exposure_nodes.append(model_node)
 
     adapter_type = parse_adapter_type(raw_manifest)
@@ -250,25 +273,25 @@ def _extract_measures_models(
             exposure_model_views.update(_extract_all_refs(measure.sql))
 
 
-def _extract_calculated_dimensions_models(
+def _extract_exposure_models(
     exposure_model_views: set[str],
-    model: dict[str, list[models.Dbt2LookerExploreDimension]],
-    exposure: models.DbtExposure,
+    exposure_model: dict[str, list[BaseModel]],
+    looker_exposure_objects: Optional[List[BaseModel]],
 ):
-    if exposure.meta.looker.dimensions:
-        for dimension in exposure.meta.looker.dimensions:
-            if not _extract_all_refs(dimension.model):
+    if looker_exposure_objects:
+        for looker_exposure_object in looker_exposure_objects:
+            if not _extract_all_refs(looker_exposure_object.model):
                 logging.error(
-                    f"Exposure dimension.model {dimension.model} should be ref('model_name')"
+                    f"Exposure model {looker_exposure_object.model} should be ref('model_name')"
                 )
                 raise Exception(
-                    f"Exposure dimension.model {dimension.model} should be ref('model_name')"
+                    f"Exposure model {looker_exposure_object.model} should be ref('model_name')"
                 )
-            main_model = _extract_all_refs(dimension.model)[0]
+            main_model = _extract_all_refs(looker_exposure_object.model)[0]
             exposure_model_views.add(main_model)
-            if not model.get(main_model):
-                model[main_model] = []
-            model[main_model].append(dimension)
+            if not exposure_model.get(main_model):
+                exposure_model[main_model] = []
+            exposure_model[main_model].append(looker_exposure_object)
 
 
 def get_column_type_from_catalog(

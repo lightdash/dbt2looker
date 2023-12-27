@@ -46,6 +46,44 @@ class LookerNoneAggregateMeasures(str, Enum):
     string = "string"
 
 
+class LookerCustomDimensions(str, Enum):
+    BIN = "bin"
+    DATE = "date"
+    DATE_TIME = "date_time"
+    DISTANCE = "distance"
+    LOCATION = "location"
+    NUMBER = "number"
+    STRING = "string"
+    TIER = "tier"
+    YESNO = "yesno"
+    ZIPCODE = "zipcode"
+
+
+class LookerParameters(str, Enum):
+    DATE = "date"
+    DATE_TIME = "date_time"
+    NUMBER = "number"
+    STRING = "string"
+    UNQUOTED = "unquoted"
+    YESNO = "yesno"
+
+
+class DimensionGroupTimeType(str, Enum):
+    TIME = "time"
+
+
+class DimensionGroupDurationType(str, Enum):
+    DURATION = "duration"
+
+
+class LookerFilters(str, Enum):
+    DATE = "date"
+    DATE_TIME = "date_time"
+    NUMBER = "number"
+    STRING = "string"
+    YESNO = "yesno"
+
+
 class LookerJoinType(str, Enum):
     left_outer = "left_outer"
     full_outer = "full_outer"
@@ -167,14 +205,45 @@ class Dbt2LookerExploreMeasure(BaseModel):
     model: str
     type: LookerNoneAggregateMeasures
     sql: str
+    filters: Optional[List[Dict[str, str]]] = None
     description: Optional[str] = ""
 
 
 class Dbt2LookerExploreDimension(BaseModel):
     name: str
     model: str
-    type: str
+    type: LookerCustomDimensions
     sql: str
+    hidden: Optional[str] = None
+    description: Optional[str] = ""
+
+
+class Dbt2LookerExploreParameter(BaseModel):
+    name: str
+    model: str
+    type: LookerParameters
+    label: Optional[str] = None
+    allowed_value: Optional[List[str]] = None
+    description: Optional[str] = ""
+
+
+class Dbt2LookerExploreFilter(BaseModel):
+    name: str
+    model: str
+    type: LookerFilters
+    label: Optional[str] = None
+    sql: Optional[str] = None
+    description: Optional[str] = ""
+
+
+class Dbt2LookerExploreDimensionGroupDuration(BaseModel):
+    name: str
+    model: str
+    type: DimensionGroupDurationType
+    sql_start: str
+    sql_end: str
+    intervals: Optional[List[str]] = None
+    datatype: Optional[str] = None
     description: Optional[str] = ""
 
 
@@ -182,8 +251,12 @@ class Dbt2MetaLookerModelMeta(BaseModel):
     joins: Optional[List[Dbt2LookerExploreJoin]] = []
     main_model: str
     connection: str
+    sql_always_where: Optional[str] = None
     measures: Optional[List[Dbt2LookerExploreMeasure]] = []
     dimensions: Optional[List[Dbt2LookerExploreDimension]] = []
+    dimension_groups: Optional[List[Dbt2LookerExploreDimensionGroupDuration]] = []
+    parameters: Optional[List[Dbt2LookerExploreParameter]] = []
+    filters: Optional[List[Dbt2LookerExploreFilter]] = []
 
 
 class Dbt2LookerModelMeta(BaseModel):
@@ -221,6 +294,11 @@ class DbtModel(DbtNode):
     create_explorer: bool = True
     none_aggregative_exposure: Optional[List[Dbt2LookerExploreMeasure]] = []
     calculated_dimension: Optional[List[Dbt2LookerExploreDimension]] = []
+    dimension_groups_exposure: Optional[
+        List[Dbt2LookerExploreDimensionGroupDuration]
+    ] = []
+    parameters_exposure: Optional[List[Dbt2LookerExploreParameter]] = []
+    filters_exposure: Optional[List[Dbt2LookerExploreFilter]] = []
 
     @validator("columns")
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):

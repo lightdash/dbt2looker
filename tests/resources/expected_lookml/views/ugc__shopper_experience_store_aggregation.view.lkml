@@ -18,6 +18,14 @@ view: ugc__shopper_experience_store_aggregation {
     ]
   }
 
+  dimension_group: duration_dimension_group {
+    type: duration
+    sql_start: {% date_start date_range_filter %} ;;
+    sql_end: {% date_end date_range_filter %} ;;
+    description: ""
+    intervals: [day]
+  }
+
   dimension: app_key {
     type: string
     sql: ${TABLE}.app_key ;;
@@ -81,5 +89,16 @@ view: ugc__shopper_experience_store_aggregation {
   measure: count {
     type: count
     description: "Default count measure"
+  }
+
+  parameter: selected_store_id {
+    type: string
+    description: ""
+    label: "selected_store_id"
+  }
+
+  filter: date_range_filter {
+    description: ""
+    type: date
   }
 }
