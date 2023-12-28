@@ -534,20 +534,16 @@ def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str)
 #     return ref_str
 
 
-def _convert_all_refs_to_relation_name(
-    ref_str: str, adjust_whitespaces: bool = True
-) -> str:
+def _convert_all_refs_to_relation_name(ref_str: str, handle_spaces: bool = True) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
     if not matches or len(matches) == 0:
         return ref_str
 
-    if adjust_whitespaces:
-        ref_str = ref_str.replace(" ", "")
+    if handle_spaces:
+        ref_str = ref_str.replace(" ", "").replace("=", " = ")
     for group_value in matches:
         ref_str = ref_str.replace(f"ref('{group_value}')", group_value)
-    if adjust_whitespaces:
-        ref_str = ref_str.replace("=", " = ")
     # in case of a compound expression with logical operator , i.e : ${join1} and ${join2} - we would like
     # to add a space between the logical operator so all elements between }...$ are captured and added a pre and post space
     ref_str = re.sub(r"}(.*?)\$", r"} \1 $", ref_str)
