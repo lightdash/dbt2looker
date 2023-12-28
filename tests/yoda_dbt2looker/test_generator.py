@@ -500,3 +500,14 @@ def test_lookml_exposure_dimension_duration_group():
         "sql_end": "case when 1=1 then 1 else 0 end",
         "description": "",
     }
+
+
+def test__remove_escape_characters():
+    string_1 = "${ref('yoda_e2e_loyalty__fact_store_profile_daily')}.count_campaigns = {\\% parameter ${ref('yoda_e2e_platform__dim_stores')}.past_num_days \\%}"
+    string_2 = "empty string"
+
+    assert (
+        generator._remove_escape_characters(string_1)
+        == "${ref('yoda_e2e_loyalty__fact_store_profile_daily')}.count_campaigns = {% parameter ${ref('yoda_e2e_platform__dim_stores')}.past_num_days %}"
+    )
+    assert generator._remove_escape_characters(string_2) == string_2
