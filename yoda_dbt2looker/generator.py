@@ -534,7 +534,9 @@ def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str)
 #     return ref_str
 
 
-def _convert_all_refs_to_relation_name(ref_str: str, adjust_whitespaces: bool = True) -> str:
+def _convert_all_refs_to_relation_name(
+    ref_str: str, adjust_whitespaces: bool = True
+) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
     if not matches or len(matches) == 0:
@@ -609,7 +611,11 @@ def lookml_model_data_from_dbt_model(model: models.DbtModel, dbt_project_name: s
         }
 
     if model.meta.looker.sql_always_where:
-        lookml["explore"]["sql_always_where"] = _remove_escape_characters(_convert_all_refs_to_relation_name(model.meta.looker.sql_always_where, False))
+        lookml["explore"]["sql_always_where"] = _remove_escape_characters(
+            _convert_all_refs_to_relation_name(
+                model.meta.looker.sql_always_where, False
+            )
+        )
 
     return lkml.dump(lookml)
 
