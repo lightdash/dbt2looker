@@ -407,7 +407,7 @@ def lookml_calculated_dimension(dimension: models.Dbt2LookerExploreDimension):
         "name": dimension.name,
         "description": dimension.description,
         "type": dimension.type.value,
-        "sql": dimension.sql,
+        "sql": _remove_escape_characters(dimension.sql),
     }
 
     if dimension.hidden:
@@ -440,7 +440,7 @@ def lookml_filter_exposure(exposure_filter: models.Dbt2LookerExploreFilter):
     }
 
     if exposure_filter.sql:
-        tmp_filter["sql"] = exposure_filter.sql
+        tmp_filter["sql"] = _remove_escape_characters(exposure_filter.sql)
 
     if exposure_filter.label:
         tmp_filter["label"] = exposure_filter.label
@@ -454,8 +454,8 @@ def lookml_exposure_dimension_group_duration(
     tmp_dimension_group_duration = {
         "name": dimension_group.name,
         "type": dimension_group.type.value,
-        "sql_start": dimension_group.sql_start,
-        "sql_end": dimension_group.sql_end,
+        "sql_start": _remove_escape_characters(dimension_group.sql_start),
+        "sql_end": _remove_escape_characters(dimension_group.sql_end),
         "description": dimension_group.description,
     }
 
@@ -534,16 +534,18 @@ def lookml_view_from_dbt_exposure(model: models.DbtModel, dbt_project_name: str)
 #     return ref_str
 
 
-def _convert_all_refs_to_relation_name(ref_str: str) -> str:
+def _convert_all_refs_to_relation_name(ref_str: str, adjust_whitespaces: bool = True) -> str:
     reg_ref = r"ref\(\s*\'(\w*)\'\s*\)"
     matches = re.findall(reg_ref, ref_str)
     if not matches or len(matches) == 0:
         return ref_str
 
-    ref_str = ref_str.replace(" ", "")
+    if adjust_whitespaces:
+        ref_str = ref_str.replace(" ", "")
     for group_value in matches:
         ref_str = ref_str.replace(f"ref('{group_value}')", group_value)
-    ref_str = ref_str.replace("=", " = ")
+    if adjust_whitespaces:
+        ref_str = ref_str.replace("=", " = ")
     # in case of a compound expression with logical operator , i.e : ${join1} and ${join2} - we would like
     # to add a space between the logical operator so all elements between }...$ are captured and added a pre and post space
     ref_str = re.sub(r"}(.*?)\$", r"} \1 $", ref_str)
@@ -607,7 +609,7 @@ def lookml_model_data_from_dbt_model(model: models.DbtModel, dbt_project_name: s
         }
 
     if model.meta.looker.sql_always_where:
-        lookml["explore"]["sql_always_where"] = model.meta.looker.sql_always_where
+        lookml["explore"]["sql_always_where"] = _remove_escape_characters(_convert_all_refs_to_relation_name(model.meta.looker.sql_always_where, False))
 
     return lkml.dump(lookml)
 
@@ -621,3 +623,7 @@ def lookml_model_from_dbt_model(
     file_name = Path(exposure_node.original_file_path).stem
     filename = f"{file_name}.model.lkml"
     return models.LookModelFile(filename=filename, contents=contents)
+
+
+def _remove_escape_characters(input_str: str, escape_char: str = "\\") -> str:
+    return input_str.replace(escape_char, "")

@@ -129,6 +129,7 @@ def parse_typed_models(
     dimension_groups = {}
     parameters = {}
     filters = {}
+    sql_always_where = {}
     for exposure in typed_dbt_exposures:
         ref_model = _extract_all_refs(exposure.meta.looker.main_model)
         if not ref_model:

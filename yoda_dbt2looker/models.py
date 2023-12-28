@@ -299,6 +299,7 @@ class DbtModel(DbtNode):
     ] = []
     parameters_exposure: Optional[List[Dbt2LookerExploreParameter]] = []
     filters_exposure: Optional[List[Dbt2LookerExploreFilter]] = []
+    sql_always_where: Optional[str] = None
 
     @validator("columns")
     def case_insensitive_column_names(cls, v: Dict[str, DbtModelColumn]):
