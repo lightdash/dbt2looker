@@ -366,7 +366,7 @@ def test_lookml_non_aggregative_measure():
     assert value == {
         "name": "measure_1",
         "type": "number",
-        "sql": "(SUM(${model_2.interacted_users} )/SUM( ${model_1.total_users})",
+        "sql": "(SUM(${model_2.interacted_users} ) / SUM( ${model_1.total_users})",
         "description": "measure_description",
     }
 

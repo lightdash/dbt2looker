@@ -398,7 +398,7 @@ def lookml_non_aggregative_measure(measure: models.Dbt2LookerExploreMeasure):
         "name": measure.name,
         "description": measure.description,
         "type": measure.type.value,
-        "sql": _convert_all_refs_to_relation_name(measure.sql),
+        "sql": _convert_all_refs_to_relation_name(measure.sql , False),
     }
 
 

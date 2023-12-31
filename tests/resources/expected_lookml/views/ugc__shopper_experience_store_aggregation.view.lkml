@@ -83,7 +83,7 @@ view: ugc__shopper_experience_store_aggregation {
   measure: engagement {
     description: ""
     type: number
-    sql: (SUM(${ugc__shopper_experience_store_aggregation.interacted_users} )/SUM( ${ugc__shopper_experience_store_aggregation.total_users})) ;;
+    sql: (SUM(${ugc__shopper_experience_store_aggregation.interacted_users} ) / SUM( ${ugc__shopper_experience_store_aggregation.total_users})) ;;
   }
 
   measure: count {
