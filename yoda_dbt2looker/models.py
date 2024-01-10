@@ -59,7 +59,6 @@ class LookerExposureMeasures(str, Enum):
     sum_distinct = "sum_distinct"
 
 
-
 class LookerCustomDimensions(str, Enum):
     BIN = "bin"
     DATE = "date"
