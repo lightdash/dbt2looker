@@ -39,11 +39,25 @@ class LookerAggregateMeasures(str, Enum):
     sum_distinct = "sum_distinct"
 
 
-class LookerNoneAggregateMeasures(str, Enum):
+class LookerExposureMeasures(str, Enum):
     number = "number"
     date = "date"
     yesno = "yesno"
     string = "string"
+    average = "average"
+    average_distinct = "average_distinct"
+    count = "count"
+    count_distinct = "count_distinct"
+    list = "list"
+    max = "max"
+    median = "median"
+    median_distinct = "median_distinct"
+    min = "min"
+    percentile = "percentile"
+    percentile_distinct = "percentile_distinct"
+    sum = "sum"
+    sum_distinct = "sum_distinct"
+
 
 
 class LookerCustomDimensions(str, Enum):
@@ -203,7 +217,7 @@ class Dbt2LookerExploreJoin(BaseModel):
 class Dbt2LookerExploreMeasure(BaseModel):
     name: str
     model: str
-    type: LookerNoneAggregateMeasures
+    type: LookerExposureMeasures
     sql: str
     filters: Optional[List[Dict[str, str]]] = None
     description: Optional[str] = ""
@@ -292,7 +306,7 @@ class DbtModel(DbtNode):
     tags: List[str]
     meta: DbtModelMeta
     create_explorer: bool = True
-    none_aggregative_exposure: Optional[List[Dbt2LookerExploreMeasure]] = []
+    measures_exposure: Optional[List[Dbt2LookerExploreMeasure]] = []
     calculated_dimension: Optional[List[Dbt2LookerExploreDimension]] = []
     dimension_groups_exposure: Optional[
         List[Dbt2LookerExploreDimensionGroupDuration]

@@ -16,14 +16,14 @@ def test__extract_measures_models():
             model="ref('model_1')",
             sql="(SUM(${ref('model_1').interacted_users}) / SUM(${ref('model_1').total_users})",
             description="",
-            type=models.LookerNoneAggregateMeasures.number.value,
+            type=models.LookerExposureMeasures.number.value,
         ),
         models.Dbt2LookerExploreMeasure(
             name="measure_2",
             model="ref('model_2')",
             sql="(SUM(${ref('model_2').interacted_users}) / SUM(${ref('model_1').total_users})",
             description="",
-            type=models.LookerNoneAggregateMeasures.number.value,
+            type=models.LookerExposureMeasures.number.value,
         ),
     ]
     _extract_measures_models(exposure_model_views, model_to_measure, exposure1)

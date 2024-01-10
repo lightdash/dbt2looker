@@ -354,8 +354,8 @@ def lookml_measures_from_model(model: models.DbtModel):
             **column.meta.metric,
         }.items()
     ]
-    for measure in model.none_aggregative_exposure:
-        measures.append(lookml_non_aggregative_measure(measure))
+    for measure in model.measures_exposure:
+        measures.append(lookml_exposure_measure(measure))
     measures.append(
         lookml_measure(
             measure_name="count",
@@ -393,7 +393,7 @@ def lookml_measure(
     return m
 
 
-def lookml_non_aggregative_measure(measure: models.Dbt2LookerExploreMeasure):
+def lookml_exposure_measure(measure: models.Dbt2LookerExploreMeasure):
     return {
         "name": measure.name,
         "description": measure.description,
