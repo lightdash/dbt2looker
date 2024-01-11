@@ -179,7 +179,7 @@ def parse_typed_models(
             raise Exception(f"Exposure join.sql_on model {model_loopup} missing")
         model_node.create_explorer = False
         if model in model_to_measure:
-            model_node.none_aggregative_exposure = model_to_measure[model]
+            model_node.measures_exposure = model_to_measure[model]
         if model in calculated_dimension:
             model_node.calculated_dimension = calculated_dimension[model]
         if model in dimension_groups:

@@ -267,9 +267,9 @@ def test_lookml_dimensions_from_model_has_compound_key_return_joined_list(
     assert generate_compound_primary_key_if_needed_mock.mock_calls[0] == call(model)
 
 
-@patch("yoda_dbt2looker.generator.lookml_non_aggregative_measure")
-def test_looker_inner_on_column_meta(lookml_non_aggregative_measure_mock):
-    lookml_non_aggregative_measure_mock.return_value = {"name": "measure_1"}
+@patch("yoda_dbt2looker.generator.lookml_exposure_measure")
+def test_looker_inner_on_column_meta(lookml_exposure_measure_mock):
+    lookml_exposure_measure_mock.return_value = {"name": "measure_1"}
     columns = dict()
     columns["col_name"] = models.DbtModelColumn(
         name="test", description="", meta=models.DbtModelColumnMeta()
@@ -287,7 +287,7 @@ def test_looker_inner_on_column_meta(lookml_non_aggregative_measure_mock):
         model="ref('a')",
         sql="(SUM(${ref('model_2').interacted_users}) / SUM(${ref('a').total_users})",
         description="measure_description",
-        type=models.LookerNoneAggregateMeasures.number.value,
+        type=models.LookerExposureMeasures.number.value,
     )
     model_meta = models.DbtModelMeta()
     model: models.DbtModel = models.DbtModel(
@@ -300,7 +300,7 @@ def test_looker_inner_on_column_meta(lookml_non_aggregative_measure_mock):
         tags=[],
         columns=columns,
         meta=model_meta,
-        none_aggregative_exposure=[measure1],
+        measures_exposure=[measure1],
     )
     model.name = "test"
 
@@ -310,7 +310,7 @@ def test_looker_inner_on_column_meta(lookml_non_aggregative_measure_mock):
         {"name": "measure_1"},
         {"name": "count", "type": "count", "description": "Default count measure"},
     ]
-    assert lookml_non_aggregative_measure_mock.mock_calls == [call(measure1)]
+    assert lookml_exposure_measure_mock.mock_calls == [call(measure1)]
 
 
 def test_main_explorer():
@@ -354,15 +354,15 @@ def test_main_explorer():
     )
 
 
-def test_lookml_non_aggregative_measure():
+def test_lookml_exposure_measure():
     measure1 = models.Dbt2LookerExploreMeasure(
         name="measure_1",
         model="ref('model_1')",
         sql="(SUM(${ref('model_2').interacted_users}) / SUM(${ref('model_1').total_users})",
         description="measure_description",
-        type=models.LookerNoneAggregateMeasures.number.value,
+        type=models.LookerExposureMeasures.number.value,
     )
-    value = generator.lookml_non_aggregative_measure(measure1)
+    value = generator.lookml_exposure_measure(measure1)
     assert value == {
         "name": "measure_1",
         "type": "number",
