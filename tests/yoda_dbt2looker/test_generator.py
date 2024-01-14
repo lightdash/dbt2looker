@@ -511,3 +511,20 @@ def test__remove_escape_characters():
         == "${ref('yoda_e2e_loyalty__fact_store_profile_daily')}.count_campaigns = {% parameter ${ref('yoda_e2e_platform__dim_stores')}.past_num_days %}"
     )
     assert generator._remove_escape_characters(string_2) == string_2
+
+
+def test_lookml_exposure_measure_with_parameter():
+    measure1 = models.Dbt2LookerExploreMeasure(
+        name="measure_1",
+        model="ref('model_1')",
+        sql="(CASE WHEN date = {\\% parameter ref('model_1').end_date \\%} THEN ${ref('model_1').total_outstanding_points_end_of_day} END)",
+        description="measure_description",
+        type=models.LookerExposureMeasures.sum.value,
+    )
+    value = generator.lookml_exposure_measure(measure1)
+    assert value == {
+        "name": "measure_1",
+        "type": "sum",
+        "sql": "(CASE WHEN date = {% parameter model_1.end_date %}  THEN  ${model_1.total_outstanding_points_end_of_day} END)",
+        "description": "measure_description",
+    }

@@ -398,7 +398,9 @@ def lookml_exposure_measure(measure: models.Dbt2LookerExploreMeasure):
         "name": measure.name,
         "description": measure.description,
         "type": measure.type.value,
-        "sql": _convert_all_refs_to_relation_name(measure.sql , False),
+        "sql": _convert_all_refs_to_relation_name(
+            _remove_escape_characters(measure.sql), False
+        ),
     }
 
 
