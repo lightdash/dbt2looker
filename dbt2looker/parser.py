@@ -57,6 +57,33 @@ def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel
             logging.debug('Model %s has no typed columns, no dimensions will be generated. %s', model.unique_id, model)
 
 
+def compare_model_vs_node_columns(model: models.DbtModel, node: models.DbtCatalogNode):
+    model_columns = set(model.columns.keys())  # as defined in YML config
+    catalogued_columns = set(node.columns.keys())  # as defined in SQL
+
+    # if the YML and SQL columns exactly match, return early
+    if not model_columns.symmetric_difference(catalogued_columns):
+        return
+
+    if model_columns.issubset(catalogued_columns):
+        for undocumented_column in sorted(catalogued_columns.difference(model_columns)):
+            logging.warning(
+                f'Column {model.unique_id}.{undocumented_column} has not been documented in YML, '
+                'but is present in the catalog. You should add it to your YML config, '
+                'or (if it is not required) remove it from the model SQL file, run the model, '
+                'and run `dbt docs generate` again')
+        # after warning the user, return early
+        return
+    
+    # otherwise, there are columns defined in YML that don't match what's defined in SQL
+    for missing_column in sorted(model_columns.difference(catalogued_columns)):
+        logging.warning(
+            f'Column {model.unique_id}.{missing_column} documented in YML, '
+            'but is not defined in the DBT catalog. Check the model SQL file '
+            'and ensure you have run the model and `dbt docs generate`')
+    return  # final return explicitly included for clarity
+
+
 def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str] = None):
     catalog_nodes = parse_catalog_nodes(raw_catalog)
     dbt_models = parse_models(raw_manifest, tag=tag)
@@ -77,6 +104,11 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
             logging.warning(
                 f'Model {model.unique_id} not found in catalog. No looker view will be generated. '
                 f'Check if model has materialized in {adapter_type} at {model.relation_name}')
+        else:
+            # we know that the model is included in the catalog - extract it
+            corresponding_catalog_node = catalog_nodes[model.unique_id]
+            # issue warnings if the catalog columns (defined via SQL) don't match what's documented in YML
+            compare_model_vs_node_columns(model, corresponding_catalog_node)
 
     # Update dbt models with data types from catalog
     dbt_typed_models = [
@@ -95,7 +127,18 @@ def parse_typed_models(raw_manifest: dict, raw_catalog: dict, tag: Optional[str]
     return dbt_typed_models
 
 
+class ColumnNotInCatalogError(Exception):
+    def __init__(self, model_id: str, column_name: str):
+        super().__init__(
+            f'Column {column_name} not found in catalog for model {model_id}, '
+            'cannot find a data type for Looker. Is the column selected in the model SQL file, '
+            'and have you run the model since adding the column to it?')
+
+
 def get_column_type_from_catalog(catalog_nodes: Dict[str, models.DbtCatalogNode], model_id: str, column_name: str):
     node = catalog_nodes.get(model_id)
     column = None if node is None else node.columns.get(column_name)
-    return None if column is None else column.type
+    if column:
+        return column.type
+    # otherwise this will fail later when we try to map the data type to a Looker type
+    raise ColumnNotInCatalogError(model_id, column_name)

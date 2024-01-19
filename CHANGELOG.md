@@ -5,6 +5,8 @@ Recent and upcoming changes to dbt2looker
 ## Unreleased
 ### Added
 - support ephemeral models (#57)
+- warnings if there is a discrepancy between manifest and catalog (#5)
+- more descriptive error message when a column's data type can't be inferred due to not being in the catalog
 
 ### Changed
 - only non-ephemeral models _selected by tag logic_ are checked to ensure the model files are not empty (instead of all models) (#57)
