@@ -31,21 +31,24 @@ def tags_match(query_tag: str, model: models.DbtModel) -> bool:
 
 def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
     manifest = models.DbtManifest(**raw_manifest)
-    all_models: List[models.DbtModel] = [
+    materialized_models: List[models.DbtModel] = [
         node
         for node in manifest.nodes.values()
-        if node.resource_type == 'model'
+        if node.resource_type == 'model' and node.config['materialized'] != 'ephemeral'
     ]
 
+    if tag is None:
+        selected_models = materialized_models
+    else:
+        selected_models = [model for model in materialized_models if tags_match(tag, model)]
+
     # Empty model files have many missing parameters
-    for model in all_models:
+    for model in selected_models:
         if not hasattr(model, 'name'):
             logging.error('Cannot parse model with id: "%s" - is the model file empty?', model.unique_id)
             raise SystemExit('Failed')
 
-    if tag is None:
-        return all_models
-    return [model for model in all_models if tags_match(tag, model)]
+    return selected_models
 
 
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):
