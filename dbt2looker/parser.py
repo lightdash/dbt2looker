@@ -37,15 +37,18 @@ def parse_models(raw_manifest: dict, tag=None) -> List[models.DbtModel]:
         if node.resource_type == 'model' and node.config['materialized'] != 'ephemeral'
     ]
 
+    if tag is None:
+        selected_models = materialized_models
+    else:
+        selected_models = [model for model in materialized_models if tags_match(tag, model)]
+
     # Empty model files have many missing parameters
-    for model in materialized_models:
+    for model in selected_models:
         if not hasattr(model, 'name'):
             logging.error('Cannot parse model with id: "%s" - is the model file empty?', model.unique_id)
             raise SystemExit('Failed')
 
-    if tag is None:
-        return materialized_models
-    return [model for model in materialized_models if tags_match(tag, model)]
+    return selected_models
 
 
 def check_models_for_missing_column_types(dbt_typed_models: List[models.DbtModel]):

@@ -6,6 +6,9 @@ Recent and upcoming changes to dbt2looker
 ### Added
 - support ephemeral models (#57)
 
+### Changed
+- only non-ephemeral models _selected by tag logic_ are checked to ensure the model files are not empty (instead of all models) (#57)
+
 ## 0.11.0
 ### Added
 - support label and hidden fields (#49)
