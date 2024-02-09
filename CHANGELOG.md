@@ -2,6 +2,10 @@
 
 Recent and upcoming changes to dbt2looker
 
+## Unreleased
+### Added
+- support ephemeral models (#57)
+
 ## 0.11.0
 ### Added
 - support label and hidden fields (#49)
