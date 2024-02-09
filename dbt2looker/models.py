@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union, Dict, List, Optional
+from typing import Any, Union, Dict, List, Optional
 try:
     from typing import Literal
 except ImportError:
@@ -144,6 +144,7 @@ class DbtModelColumn(BaseModel):
 class DbtNode(BaseModel):
     unique_id: str
     resource_type: str
+    config: Dict[str, Any]
 
 
 class Dbt2LookerExploreJoin(BaseModel):
